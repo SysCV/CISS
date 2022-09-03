@@ -1,4 +1,4 @@
-# Obtained from: https://github.com/lhoyer/DAFormer
+# Obtained from: https://github.com/lhoyer/HRDA
 # Modifications: Add startup test
 
 import argparse

@@ -123,3 +123,7 @@ configs/tmp_param.json
 configs/generated/
 *.pdf
 *.pgf
+
+# Artifacts
+/work_dirs
+/experiments/logs/

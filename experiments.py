@@ -551,6 +551,26 @@ def generate_experiment_cfgs(id):
                 gpu_model = 'NVIDIATITANRTX'
                 cfg = config_from_vars()
                 cfgs.append(cfg)
+    # -------------------------------------------------------------------------
+    # HRDA Reproduction on Cityscapes -> ACDC.
+    # -------------------------------------------------------------------------
+    elif id == 50:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        # Use plcrop=False as ACDC has no rectification
+        # artifacts in contrast to Cityscapes.
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings', 0.01, False
+        inference = 'slide'
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
     else:
         raise NotImplementedError('Unknown id {}'.format(id))
 
