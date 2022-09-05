@@ -4,7 +4,7 @@
 module load gcc/6.3.0 python eth_proxy pigz
 
 # Activate virtual environment for DISS.
-source /cluster/home/csakarid/DISS/bin/activate
+# source /cluster/home/csakarid/DISS/bin/activate
 
 # Copy datasets to local scratch of compute node.
 /bin/echo Starting dataset copying on: `date`
@@ -21,8 +21,8 @@ tar -I pigz -xf ${TAR_TARGET_DATASET} -C ${DIR_TARGET_DATASET}/
 
 # Create symlinks in the data directory of the repository to the data in the compute
 # node scratch.
-ln -s ${SOURCE_DIR}/data/${SOURCE_DATASET} ${DIR_SOURCE_DATASET}/
-ln -s ${SOURCE_DIR}/data/${TARGET_DATASET} ${DIR_TARGET_DATASET}/
+ln -s ${DIR_SOURCE_DATASET} ${SOURCE_DIR}/data
+ln -s ${DIR_TARGET_DATASET} ${SOURCE_DIR}/data
 
 # Create temporary directory for storing the results of the experiment.
 # mkdir ${3}
