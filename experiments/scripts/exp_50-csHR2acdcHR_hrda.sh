@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 # Specify time limit.
-#BSUB -W 120:00
+#BSUB -W 48:00
 #
 # Specify memory limit.
-#BSUB -R "rusage[mem=50000]"
+#BSUB -R "rusage[mem=30000]"
 #
 # Specify disk limit on local scratch.
 #BSUB -R "rusage[scratch=200000]"
