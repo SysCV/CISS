@@ -1028,15 +1028,20 @@ class FDA(object):
         self.keys = keys
 
     def low_freq_mutate_np(self, amp_src, amp_trg):
-        a_src = np.fft.fftshift(amp_src, axes=(-2, -1))
-        a_trg = np.fft.fftshift(amp_trg, axes=(-2, -1))
+        a_src = np.fft.fftshift(amp_src, axes=(-3, -2))
+        # a_src = np.fft.fftshift(amp_src, axes=(-2, -1))
+        a_trg = np.fft.fftshift(amp_trg, axes=(-3, -2))
+        # a_trg = np.fft.fftshift(amp_trg, axes=(-2, -1))
 
-        _, h, w = a_src.shape
+        h, w, _ = a_src.shape
+        # _, h, w = a_src.shape
         b = (np.floor(np.amin((h,w)) * self.bandwidth)).astype(int)
+        print(b)
         c_h = np.floor(h/2.0).astype(int)
         c_w = np.floor(w/2.0).astype(int)
         
-        _, h_trg, w_trg = a_trg.shape
+        h_trg, w_trg, _ = a_trg.shape
+        # _, h_trg, w_trg = a_trg.shape
         c_trg_h = np.floor(h_trg/2.0).astype(int)
         c_trg_w = np.floor(w_trg/2.0).astype(int)
 
@@ -1050,8 +1055,10 @@ class FDA(object):
         w1_trg = c_trg_w - b
         w2_trg = c_trg_w + b + 1
 
-        a_src[:,h1:h2,w1:w2] = a_trg[:,h1_trg:h2_trg,w1_trg:w2_trg]
-        a_src = np.fft.ifftshift(a_src, axes=(-2, -1))
+        a_src[h1:h2,w1:w2,:] = a_trg[h1_trg:h2_trg,w1_trg:w2_trg,:]
+        # a_src[:,h1:h2,w1:w2] = a_trg[:,h1_trg:h2_trg,w1_trg:w2_trg]
+        a_src = np.fft.ifftshift(a_src, axes=(-3, -2))
+        # a_src = np.fft.ifftshift(a_src, axes=(-2, -1))
         return a_src
 
     def fda_source_to_target_np(self, src_img, trg_img):
@@ -1061,9 +1068,14 @@ class FDA(object):
         src_img_np = src_img #.cpu().numpy()
         trg_img_np = trg_img #.cpu().numpy()
 
+        print(src_img_np.shape)
+        print(trg_img_np.shape)
+
         # get fft of both source and target
-        fft_src_np = np.fft.fft2(src_img_np, axes=(-2, -1))
-        fft_trg_np = np.fft.fft2(trg_img_np, axes=(-2, -1))
+        fft_src_np = np.fft.fft2(src_img_np, axes=(-3, -2))
+        # fft_src_np = np.fft.fft2(src_img_np, axes=(-2, -1))
+        fft_trg_np = np.fft.fft2(trg_img_np, axes=(-3, -2))
+        # fft_trg_np = np.fft.fft2(trg_img_np, axes=(-2, -1))
 
         # extract amplitude and phase of both ffts
         amp_src, pha_src = np.abs(fft_src_np), np.angle(fft_src_np)
@@ -1076,7 +1088,8 @@ class FDA(object):
         fft_src_ = amp_src_ * np.exp(1j * pha_src)
 
         # get the mutated image
-        src_in_trg = np.fft.ifft2(fft_src_, axes=(-2, -1))
+        src_in_trg = np.fft.ifft2(fft_src_, axes=(-3, -2))
+        # src_in_trg = np.fft.ifft2(fft_src_, axes=(-2, -1))
         src_in_trg = np.real(src_in_trg)
 
         return src_in_trg
