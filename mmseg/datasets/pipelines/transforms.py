@@ -1070,7 +1070,7 @@ class FDA(object):
         amp_trg, pha_trg = np.abs(fft_trg_np), np.angle(fft_trg_np)
 
         # mutate the amplitude part of source with target
-        amp_src_ = low_freq_mutate_np(amp_src, amp_trg)
+        amp_src_ = self.low_freq_mutate_np(amp_src, amp_trg)
 
         # mutated fft of source
         fft_src_ = amp_src_ * np.exp(1j * pha_src)
