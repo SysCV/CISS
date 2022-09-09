@@ -59,9 +59,12 @@ class DACSDISS(DACS):
         # else:
         #     self.imnet_model = None
         
-        self.stylization = cfg['stylization']
+        self.stylization = cfg['stylize']
+        self.stylization['source'] = self.stylization.get('source', {})
+        self.stylization['source']['ce_original'] = self.stylization['source'].get('ce_original', False)
+        self.stylization['source']['ce_stylized'] = self.stylization['source'].get('ce_stylized', False)
         assert self.stylization['source']['ce_original'] or self.stylization['source']['ce_stylized']
-        self.stylization['target'] = cfg['stylization'].get('target', {})
+        self.stylization['target'] = cfg['stylize'].get('target', {})
         self.stylization['target']['pseudolabels'] = self.stylization['target'].get('pseudolabels', 'original')
         self.stylization['target']['ce'] = self.stylization['target'].get('ce', [('original', 'original')])
         assert len(self.stylization['target']['ce']) > 0
