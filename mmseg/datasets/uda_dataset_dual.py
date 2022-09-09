@@ -74,7 +74,8 @@ class UDADatasetDual(CustomDatasetDual):
                  reduce_zero_label=False,
                  classes=None,
                  palette=None,
-                 cfg):
+                 sync_crop_size=None,
+                 rare_class_sampling=None):
                  
         super(UDADatasetDual, self).__init__(pipeline=pipeline,
                                              img_dir_source=img_dir_source,
@@ -96,8 +97,8 @@ class UDADatasetDual(CustomDatasetDual):
                                              palette=palette)
         self.source = source
         self.target = target
-        self.sync_crop_size = cfg.get('sync_crop_size')
-        rcs_cfg = cfg.get('rare_class_sampling')
+        self.sync_crop_size = sync_crop_size
+        rcs_cfg = rare_class_sampling
         self.rcs_enabled = rcs_cfg is not None
         if self.rcs_enabled:
             self.rcs_class_temp = rcs_cfg['class_temp']
@@ -105,13 +106,11 @@ class UDADatasetDual(CustomDatasetDual):
             self.rcs_min_pixels = rcs_cfg['min_pixels']
 
             self.rcs_classes, self.rcs_classprob = get_rcs_class_probs(
-                cfg['data_root_source'], self.rcs_class_temp)
+                data_root_source, self.rcs_class_temp)
             mmcv.print_log(f'RCS Classes: {self.rcs_classes}', 'mmseg')
             mmcv.print_log(f'RCS ClassProb: {self.rcs_classprob}', 'mmseg')
 
-            with open(
-                    osp.join(cfg['data_root_source'],
-                             'samples_with_class.json'), 'r') as of:
+            with open(osp.join(data_root_source, 'samples_with_class.json'), 'r') as of:
                 samples_with_class_and_n = json.load(of)
             samples_with_class_and_n = {
                 int(k): v
