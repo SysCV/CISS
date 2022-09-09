@@ -305,7 +305,7 @@ class Collect(object):
                 - ``img_metas``
         """
 
-        if self.keys is None:
+        if self.parts is None:
             results_tmp = [results]
             data_tmp = [{}]
         else:
@@ -320,7 +320,7 @@ class Collect(object):
             for key in self.meta_keys:
                 img_meta[key] = r[key]
             data_tmp[i]['img_metas'] = DC(img_meta, cpu_only=True)
-            for key in self.keys:
+            for key in self.keys[i]:
                 data_tmp[i][key] = r[key]
         
         if self.parts is None:
