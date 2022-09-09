@@ -237,8 +237,12 @@ def generate_experiment_cfgs(id):
             cfg['_base_'].append(
                 f'_base_/datasets/{source}_to_{target}_{crop}.py')
         else:
-            cfg['_base_'].append(
-                f'_base_/datasets/uda_{source}_to_{target}_{crop}.py')
+            if stylization is not None:
+                cfg['_base_'].append(
+                    f'_base_/datasets/uda_{source}_to_{target}_{crop}_{stylization}.py')
+            else:
+                cfg['_base_'].append(
+                    f'_base_/datasets/uda_{source}_to_{target}_{crop}.py')
             cfg['_base_'].append(f'_base_/uda/{uda}.py')
         cfg['data'] = dict(
             samples_per_gpu=batch_size,
@@ -263,6 +267,8 @@ def generate_experiment_cfgs(id):
         if 'dacs' in uda and sync_crop_size_mod is not None:
             cfg.setdefault('data', {}).setdefault('train', {})
             cfg['data']['train']['sync_crop_size'] = sync_crop_size_mod
+        if stylization is not None:
+            cfg['uda']['stylization'] = stylization
 
         # Setup optimizer and schedule
         if 'dacs' in uda or 'minent' in uda or 'advseg' in uda:
@@ -341,7 +347,9 @@ def generate_experiment_cfgs(id):
     datasets = [
         ('gta', 'cityscapes'),
     ]
+    stylization = None
     architecture = None
+    diss_config = None
     workers_per_gpu = 1
     rcs_T = None
     rcs_min_crop = 0.5
@@ -562,6 +570,25 @@ def generate_experiment_cfgs(id):
         # Use plcrop=False as ACDC has no rectification
         # artifacts in contrast to Cityscapes.
         uda, rcs_T, plcrop = 'dacs_a999_fdthings', 0.01, False
+        inference = 'slide'
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # -------------------------------------------------------------------------
+    # FDA baseline for DISS on Cityscapes -> ACDC. First attempt.
+    # -------------------------------------------------------------------------
+    elif id == 51:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized', 0.01, False
         inference = 'slide'
         for dataset, architecture, sync_crop_size in [
             (cs2acdc, f'hrda1-512-0.1_{dec}', None),
