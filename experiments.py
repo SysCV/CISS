@@ -268,6 +268,7 @@ def generate_experiment_cfgs(id):
             cfg.setdefault('data', {}).setdefault('train', {})
             cfg['data']['train']['sync_crop_size'] = sync_crop_size_mod
         if stylization is not None:
+            cfg.setdefault('uda', {})
             cfg['uda']['stylization'] = stylization
 
         # Setup optimizer and schedule
