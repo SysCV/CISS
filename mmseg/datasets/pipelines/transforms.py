@@ -1095,7 +1095,7 @@ class FDA(object):
         if self.keys is not None:
             for k in self.keys:
                 src, trg = k
-                results[src]['img_stylized'] = fda_source_to_target_np(
+                results[src]['img_stylized'] = self.fda_source_to_target_np(
                     results[src]['img'],
                     results[trg]['img'],
                     self.bandwidth)
