@@ -1096,8 +1096,8 @@ class FDA(object):
             for k in self.keys:
                 src, trg = k
                 results[src]['img_stylized'] = self.fda_source_to_target_np(
-                    results[src]['img'],
-                    results[trg]['img'],
+                    src_img=results[src]['img'],
+                    trg_img=results[trg]['img'],
                     bandwidth=self.bandwidth)
                 results[src]['bandwidth'] = self.bandwidth
         return results
