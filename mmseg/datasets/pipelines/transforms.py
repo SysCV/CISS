@@ -1027,12 +1027,12 @@ class FDA(object):
         self.bandwidth = bandwidth
         self.keys = keys
 
-    def low_freq_mutate_np(amp_src, amp_trg, bandwidth=0.01):
+    def low_freq_mutate_np(self, amp_src, amp_trg):
         a_src = np.fft.fftshift(amp_src, axes=(-2, -1))
         a_trg = np.fft.fftshift(amp_trg, axes=(-2, -1))
 
         _, h, w = a_src.shape
-        b = (np.floor(np.amin((h,w)) * bandwidth)).astype(int)
+        b = (np.floor(np.amin((h,w)) * self.bandwidth)).astype(int)
         c_h = np.floor(h/2.0).astype(int)
         c_w = np.floor(w/2.0).astype(int)
         
@@ -1054,7 +1054,7 @@ class FDA(object):
         a_src = np.fft.ifftshift(a_src, axes=(-2, -1))
         return a_src
 
-    def fda_source_to_target_np(src_img, trg_img, bandwidth=0.01):
+    def fda_source_to_target_np(self, src_img, trg_img):
         # exchange magnitude
         # input: src_img, trg_img
 
@@ -1070,7 +1070,7 @@ class FDA(object):
         amp_trg, pha_trg = np.abs(fft_trg_np), np.angle(fft_trg_np)
 
         # mutate the amplitude part of source with target
-        amp_src_ = low_freq_mutate_np(amp_src, amp_trg, bandwidth=bandwidth)
+        amp_src_ = low_freq_mutate_np(amp_src, amp_trg)
 
         # mutated fft of source
         fft_src_ = amp_src_ * np.exp(1j * pha_src)
@@ -1096,9 +1096,8 @@ class FDA(object):
             for k in self.keys:
                 src, trg = k
                 results[src]['img_stylized'] = self.fda_source_to_target_np(
-                    src_img=results[src]['img'],
-                    trg_img=results[trg]['img'],
-                    bandwidth=self.bandwidth)
+                    results[src]['img'],
+                    results[trg]['img'])
                 results[src]['bandwidth'] = self.bandwidth
         return results
 
