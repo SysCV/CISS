@@ -189,6 +189,9 @@ class DefaultFormatBundle(object):
                        (3)to DataContainer (stack=True)
     """
 
+    def __init__(self, keys=None):
+        self.keys = keys
+    
     def __call__(self, results):
         """Call function to transform and format common fields in results.
 
@@ -200,21 +203,41 @@ class DefaultFormatBundle(object):
                 default bundle.
         """
 
-        if 'img' in results:
-            img = results['img']
-            if len(img.shape) < 3:
-                img = np.expand_dims(img, -1)
-            img = np.ascontiguousarray(img.transpose(2, 0, 1))
-            results['img'] = DC(to_tensor(img), stack=True)
-        if 'gt_semantic_seg' in results:
-            # convert to long
-            results['gt_semantic_seg'] = DC(
-                to_tensor(results['gt_semantic_seg'][None,
-                                                     ...].astype(np.int64)),
-                stack=True)
-        if 'valid_pseudo_mask' in results:
-            results['valid_pseudo_mask'] = DC(
-                to_tensor(results['valid_pseudo_mask'][None, ...]), stack=True)
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            if 'img' in r:
+                img = r['img']
+                if len(img.shape) < 3:
+                    img = np.expand_dims(img, -1)
+                img = np.ascontiguousarray(img.transpose(2, 0, 1))
+                results_tmp[i]['img'] = DC(to_tensor(img), stack=True)
+            if 'img_stylized' in r:
+                img_stylized = r['img_stylized']
+                if len(img_stylized.shape) < 3:
+                    img_stylized = np.expand_dims(img_stylized, -1)
+                img_stylized = np.ascontiguousarray(img_stylized.transpose(2, 0, 1))
+                results_tmp[i]['img_stylized'] = DC(to_tensor(img_stylized), stack=True)
+            if 'gt_semantic_seg' in r:
+                # convert to long
+                results_tmp[i]['gt_semantic_seg'] = DC(
+                    to_tensor(r['gt_semantic_seg'][None, ...].astype(np.int64)),
+                    stack=True)
+            if 'valid_pseudo_mask' in r:
+                results_tmp[i]['valid_pseudo_mask'] = DC(
+                    to_tensor(r['valid_pseudo_mask'][None, ...]), stack=True)
+        
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]
+        
         return results
 
     def __repr__(self):
@@ -226,7 +249,7 @@ class Collect(object):
     """Collect data from the loader relevant to the specific task.
 
     This is usually the last stage of the data loader pipeline. Typically keys
-    is set to some subset of "img", "gt_semantic_seg".
+    is set to some subset of "img", "img_stylized", "gt_semantic_seg".
 
     The "img_meta" item is always populated.  The contents of the "img_meta"
     dictionary depends on "meta_keys". By default this includes:
@@ -263,9 +286,11 @@ class Collect(object):
                  keys,
                  meta_keys=('filename', 'ori_filename', 'ori_shape',
                             'img_shape', 'pad_shape', 'scale_factor', 'flip',
-                            'flip_direction', 'img_norm_cfg')):
+                            'flip_direction', 'img_norm_cfg'),
+                parts=None):
         self.keys = keys
         self.meta_keys = meta_keys
+        self.parts = parts
 
     def __call__(self, results):
         """Call function to collect keys in results. The keys in ``meta_keys``
@@ -280,13 +305,31 @@ class Collect(object):
                 - ``img_metas``
         """
 
-        data = {}
-        img_meta = {}
-        for key in self.meta_keys:
-            img_meta[key] = results[key]
-        data['img_metas'] = DC(img_meta, cpu_only=True)
-        for key in self.keys:
-            data[key] = results[key]
+        if self.keys is None:
+            results_tmp = [results]
+            data_tmp = [{}]
+        else:
+            results_tmp = []
+            data_tmp = []
+            for k in self.parts:
+                results_tmp.append(results[k])
+                data_tmp.append({})
+
+        for i, r in enumerate(results_tmp):
+            img_meta = {}
+            for key in self.meta_keys:
+                img_meta[key] = r[key]
+            data_tmp[i]['img_metas'] = DC(img_meta, cpu_only=True)
+            for key in self.keys:
+                data_tmp[i][key] = r[key]
+        
+        if self.parts is None:
+            data = data_tmp[0]
+        else:
+            data = {}
+            for i, k in enumerate(self.parts):
+                data[k] = data_tmp[i]
+        
         return data
 
     def __repr__(self):

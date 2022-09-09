@@ -1,5 +1,8 @@
 # Obtained from: https://github.com/open-mmlab/mmsegmentation/tree/v0.16.0
-# Modifications: Support override_scale in Resize
+# Modifications:
+# 1) Support override_scale in Resize
+# 2) Update Resize, RandomCrop, RandomFlip, Normalize, Pad to support indexing of results with keys.
+# 3) Include Fourier domain adaptation (FDA) transform.
 
 import mmcv
 import numpy as np
@@ -49,7 +52,8 @@ class Resize(object):
                  multiscale_mode='range',
                  ratio_range=None,
                  keep_ratio=True,
-                 override_scale=False):
+                 override_scale=False,
+                 keys=None):
         if img_scale is None:
             self.img_scale = None
         else:
@@ -71,6 +75,7 @@ class Resize(object):
         self.ratio_range = ratio_range
         self.keep_ratio = keep_ratio
         self.override_scale = override_scale
+        self.keys = keys
 
     @staticmethod
     def random_select(img_scales):
@@ -182,6 +187,8 @@ class Resize(object):
         results['scale'] = scale
         results['scale_idx'] = scale_idx
 
+        return results
+
     def _resize_img(self, results):
         """Resize images with ``results['scale']``."""
         if self.keep_ratio:
@@ -203,6 +210,8 @@ class Resize(object):
         results['pad_shape'] = img.shape  # in case that there is no padding
         results['scale_factor'] = scale_factor
         results['keep_ratio'] = self.keep_ratio
+        
+        return results
 
     def _resize_seg(self, results):
         """Resize semantic segmentation map with ``results['scale']``."""
@@ -214,6 +223,8 @@ class Resize(object):
                 gt_seg = mmcv.imresize(
                     results[key], results['scale'], interpolation='nearest')
             results[key] = gt_seg
+        
+        return results
 
     def __call__(self, results):
         """Call function to resize images, bounding boxes, masks, semantic
@@ -227,10 +238,22 @@ class Resize(object):
                 'keep_ratio' keys are added into result dict.
         """
 
-        if 'scale' not in results or self.override_scale:
-            self._random_scale(results)
-        self._resize_img(results)
-        self._resize_seg(results)
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        for i, r in enumerate(results_tmp):
+            if 'scale' not in r or self.override_scale:
+                results_tmp[i] = self._random_scale(results_tmp[i])
+            results_tmp[i] = self._resize_img(results_tmp[i])
+            results_tmp[i] = self._resize_seg(results_tmp[i])
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]
         return results
 
     def __repr__(self):
@@ -257,12 +280,13 @@ class RandomFlip(object):
     """
 
     @deprecated_api_warning({'flip_ratio': 'prob'}, cls_name='RandomFlip')
-    def __init__(self, prob=None, direction='horizontal'):
+    def __init__(self, prob=None, direction='horizontal', keys=None):
         self.prob = prob
         self.direction = direction
         if prob is not None:
             assert prob >= 0 and prob <= 1
         assert direction in ['horizontal', 'vertical']
+        self.keys = keys
 
     def __call__(self, results):
         """Call function to flip bounding boxes, masks, semantic segmentation
@@ -276,21 +300,41 @@ class RandomFlip(object):
                 result dict.
         """
 
-        if 'flip' not in results:
-            flip = True if np.random.rand() < self.prob else False
-            results['flip'] = flip
-        if 'flip_direction' not in results:
-            results['flip_direction'] = self.direction
-        if results['flip']:
-            # flip image
-            results['img'] = mmcv.imflip(
-                results['img'], direction=results['flip_direction'])
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            if 'flip' not in r:
+                flip = True if np.random.rand() < self.prob else False
+                results_tmp[i]['flip'] = flip
+            if 'flip_direction' not in r:
+                results_tmp[i]['flip_direction'] = self.direction
+            if results_tmp[i]['flip']:
+                # flip image
+                results_tmp[i]['img'] = mmcv.imflip(
+                    r['img'], direction=results_tmp[i]['flip_direction'])
 
-            # flip segs
-            for key in results.get('seg_fields', []):
-                # use copy() to make numpy stride positive
-                results[key] = mmcv.imflip(
-                    results[key], direction=results['flip_direction']).copy()
+                # Flip the stylized image.
+                if 'img_stylized' in r:
+                    results_tmp[i]['img_stylized'] = mmcv.imflip(
+                        r['img_stylized'], direction=results_tmp[i]['flip_direction'])
+                
+                # flip segs
+                for key in r.get('seg_fields', []):
+                    # use copy() to make numpy stride positive
+                    results_tmp[i][key] = mmcv.imflip(
+                        r[key], direction=results['flip_direction']).copy()
+        
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]
+
         return results
 
     def __repr__(self):
@@ -317,11 +361,13 @@ class Pad(object):
                  size=None,
                  size_divisor=None,
                  pad_val=0,
-                 seg_pad_val=255):
+                 seg_pad_val=255,
+                 keys=None):
         self.size = size
         self.size_divisor = size_divisor
         self.pad_val = pad_val
         self.seg_pad_val = seg_pad_val
+        self.keys = keys
         # only one of size and size_divisor should be valid
         assert size is not None or size_divisor is not None
         assert size is None or size_divisor is None
@@ -331,13 +377,23 @@ class Pad(object):
         if self.size is not None:
             padded_img = mmcv.impad(
                 results['img'], shape=self.size, pad_val=self.pad_val)
+            if 'img_stylized' in results:
+                padded_img_stylized = mmcv.impad(
+                    results['img_stylized'], shape=self.size, pad_val=self.pad_val)
         elif self.size_divisor is not None:
             padded_img = mmcv.impad_to_multiple(
                 results['img'], self.size_divisor, pad_val=self.pad_val)
+            if 'img_stylized' in results:
+                padded_img_stylized = mmcv.impad_to_multiple(
+                    results['img_stylized'], self.size_divisor, pad_val=self.pad_val)
         results['img'] = padded_img
+        if 'img_stylized' in results:
+            results['img_stylized'] = padded_img_stylized
         results['pad_shape'] = padded_img.shape
         results['pad_fixed_size'] = self.size
         results['pad_size_divisor'] = self.size_divisor
+
+        return results
 
     def _pad_seg(self, results):
         """Pad masks according to ``results['pad_shape']``."""
@@ -346,6 +402,8 @@ class Pad(object):
                 results[key],
                 shape=results['pad_shape'][:2],
                 pad_val=self.seg_pad_val)
+        
+        return results
 
     def __call__(self, results):
         """Call function to pad images, masks, semantic segmentation maps.
@@ -357,8 +415,23 @@ class Pad(object):
             dict: Updated result dict.
         """
 
-        self._pad_img(results)
-        self._pad_seg(results)
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            results_tmp[i] = self._pad_img(results_tmp[i])
+            results_tmp[i] = self._pad_seg(results_tmp[i])
+        
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]        
+        
         return results
 
     def __repr__(self):
@@ -381,10 +454,11 @@ class Normalize(object):
             default is true.
     """
 
-    def __init__(self, mean, std, to_rgb=True):
+    def __init__(self, mean, std, to_rgb=True, keys=None):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
         self.to_rgb = to_rgb
+        self.keys = keys
 
     def __call__(self, results):
         """Call function to normalize images.
@@ -397,10 +471,31 @@ class Normalize(object):
                 result dict.
         """
 
-        results['img'] = mmcv.imnormalize(results['img'], self.mean, self.std,
-                                          self.to_rgb)
-        results['img_norm_cfg'] = dict(
-            mean=self.mean, std=self.std, to_rgb=self.to_rgb)
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            results_tmp[i]['img'] = mmcv.imnormalize(r['img'], self.mean, self.std,
+                                            self.to_rgb)
+            if 'img_stylized' in r:
+                results_tmp[i]['img_stylized'] = mmcv.imnormalize(
+                    r['img_stylized'],
+                    self.mean,
+                    self.std,
+                    self.to_rgb)
+            results_tmp[i]['img_norm_cfg'] = dict(
+                mean=self.mean, std=self.std, to_rgb=self.to_rgb)
+        
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]        
+        
         return results
 
     def __repr__(self):
@@ -511,11 +606,12 @@ class RandomCrop(object):
             occupy.
     """
 
-    def __init__(self, crop_size, cat_max_ratio=1., ignore_index=255):
+    def __init__(self, crop_size, cat_max_ratio=1., ignore_index=255, keys=None):
         assert crop_size[0] > 0 and crop_size[1] > 0
         self.crop_size = crop_size
         self.cat_max_ratio = cat_max_ratio
         self.ignore_index = ignore_index
+        self.keys = keys
 
     def get_crop_bbox(self, img):
         """Randomly get a crop bounding box."""
@@ -545,29 +641,49 @@ class RandomCrop(object):
                 updated according to crop size.
         """
 
-        img = results['img']
-        crop_bbox = self.get_crop_bbox(img)
-        if self.cat_max_ratio < 1.:
-            # Repeat 10 times
-            for _ in range(10):
-                seg_temp = self.crop(results['gt_semantic_seg'], crop_bbox)
-                labels, cnt = np.unique(seg_temp, return_counts=True)
-                cnt = cnt[labels != self.ignore_index]
-                if len(cnt) > 1 and np.max(cnt) / np.sum(
-                        cnt) < self.cat_max_ratio:
-                    break
-                crop_bbox = self.get_crop_bbox(img)
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            img = r['img']
+            crop_bbox = self.get_crop_bbox(img)
+            if self.cat_max_ratio < 1.:
+                # Repeat 10 times
+                for _ in range(10):
+                    seg_temp = self.crop(r['gt_semantic_seg'], crop_bbox)
+                    labels, cnt = np.unique(seg_temp, return_counts=True)
+                    cnt = cnt[labels != self.ignore_index]
+                    if len(cnt) > 1 and np.max(cnt) / np.sum(
+                            cnt) < self.cat_max_ratio:
+                        break
+                    crop_bbox = self.get_crop_bbox(img)
 
-        # crop the image
-        img = self.crop(img, crop_bbox)
-        img_shape = img.shape
-        results['img'] = img
-        results['img_shape'] = img_shape
+            # crop the image
+            img = self.crop(img, crop_bbox)
+            img_shape = img.shape
+            results_tmp[i]['img'] = img
+            results_tmp[i]['img_shape'] = img_shape
 
-        # crop semantic seg
-        for key in results.get('seg_fields', []):
-            results[key] = self.crop(results[key], crop_bbox)
+            # crop the stylized image
+            if 'img_stylized' in r:
+                img_stylized = r['img_stylized']
+                img_stylized = self.crop(img_stylized, crop_bbox)
+                results_tmp[i]['img_stylized'] = img_stylized
+            
+            # crop semantic seg
+            for key in r.get('seg_fields', []):
+                results_tmp[i][key] = self.crop(r[key], crop_bbox)
 
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]
+        
         return results
 
     def __repr__(self):
@@ -894,4 +1010,99 @@ class PhotoMetricDistortion(object):
                      f'saturation_range=({self.saturation_lower}, '
                      f'{self.saturation_upper}), '
                      f'hue_delta={self.hue_delta})')
+        return repr_str
+
+
+@PIPELINES.register_module()
+class FDA(object):
+    """Perform Fourier Domain Adaptation (FDA) with the source and target images.
+
+    Added keys are src.img_stylized and src.bandwidth for (src, _) in keys.
+
+    Args:
+        bandwidth (float): Value for bandwidth of low-frequency band in FDA.
+    """
+
+    def __init__(self, bandwidth, keys=None):
+        self.bandwidth = bandwidth
+        self.keys = keys
+
+    def low_freq_mutate_np(amp_src, amp_trg, bandwidth=0.01):
+        a_src = np.fft.fftshift(amp_src, axes=(-2, -1))
+        a_trg = np.fft.fftshift(amp_trg, axes=(-2, -1))
+
+        _, h, w = a_src.shape
+        b = (np.floor(np.amin((h,w)) * bandwidth)).astype(int)
+        c_h = np.floor(h/2.0).astype(int)
+        c_w = np.floor(w/2.0).astype(int)
+        
+        _, h_trg, w_trg = a_trg.shape
+        c_trg_h = np.floor(h_trg/2.0).astype(int)
+        c_trg_w = np.floor(w_trg/2.0).astype(int)
+
+        h1 = c_h-b
+        h2 = c_h+b+1
+        w1 = c_w-b
+        w2 = c_w+b+1
+
+        h1_trg = c_trg_h - b
+        h2_trg = c_trg_h + b + 1
+        w1_trg = c_trg_w - b
+        w2_trg = c_trg_w + b + 1
+
+        a_src[:,h1:h2,w1:w2] = a_trg[:,h1_trg:h2_trg,w1_trg:w2_trg]
+        a_src = np.fft.ifftshift(a_src, axes=(-2, -1))
+        return a_src
+
+    def fda_source_to_target_np(src_img, trg_img, bandwidth=0.01):
+        # exchange magnitude
+        # input: src_img, trg_img
+
+        src_img_np = src_img #.cpu().numpy()
+        trg_img_np = trg_img #.cpu().numpy()
+
+        # get fft of both source and target
+        fft_src_np = np.fft.fft2(src_img_np, axes=(-2, -1))
+        fft_trg_np = np.fft.fft2(trg_img_np, axes=(-2, -1))
+
+        # extract amplitude and phase of both ffts
+        amp_src, pha_src = np.abs(fft_src_np), np.angle(fft_src_np)
+        amp_trg, pha_trg = np.abs(fft_trg_np), np.angle(fft_trg_np)
+
+        # mutate the amplitude part of source with target
+        amp_src_ = low_freq_mutate_np(amp_src, amp_trg, bandwidth=bandwidth)
+
+        # mutated fft of source
+        fft_src_ = amp_src_ * np.exp(1j * pha_src)
+
+        # get the mutated image
+        src_in_trg = np.fft.ifft2(fft_src_, axes=(-2, -1))
+        src_in_trg = np.real(src_in_trg)
+
+        return src_in_trg
+
+    def __call__(self, results):
+        """Call function to perform FDA.
+
+        Args:
+            results (dict): Result dict from loading pipeline.
+
+        Returns:
+            dict: Normalized results, 'img_norm_cfg' key is added into
+                result dict.
+        """
+
+        if self.keys is not None:
+            for k in self.keys:
+                src, trg = k
+                results[src]['img_stylized'] = fda_source_to_target_np(
+                    results[src]['img'],
+                    results[trg]['img'],
+                    self.bandwidth)
+                results[src]['bandwidth'] = self.bandwidth
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(bandwidth={self.bandwidth})'
         return repr_str

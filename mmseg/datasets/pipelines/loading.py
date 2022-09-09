@@ -34,12 +34,14 @@ class LoadImageFromFile(object):
                  to_float32=False,
                  color_type='color',
                  file_client_args=dict(backend='disk'),
-                 imdecode_backend='cv2'):
+                 imdecode_backend='cv2',
+                 keys=None):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
         self.file_client = None
         self.imdecode_backend = imdecode_backend
+        self.keys = keys
 
     def __call__(self, results):
         """Call functions to load image and get image meta information.
@@ -54,30 +56,43 @@ class LoadImageFromFile(object):
         if self.file_client is None:
             self.file_client = mmcv.FileClient(**self.file_client_args)
 
-        if results.get('img_prefix') is not None:
-            filename = osp.join(results['img_prefix'],
-                                results['img_info']['filename'])
+        if self.keys is None:
+            results_tmp = [results]
         else:
-            filename = results['img_info']['filename']
-        img_bytes = self.file_client.get(filename)
-        img = mmcv.imfrombytes(
-            img_bytes, flag=self.color_type, backend=self.imdecode_backend)
-        if self.to_float32:
-            img = img.astype(np.float32)
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
 
-        results['filename'] = filename
-        results['ori_filename'] = results['img_info']['filename']
-        results['img'] = img
-        results['img_shape'] = img.shape
-        results['ori_shape'] = img.shape
-        # Set initial values for default meta_keys
-        results['pad_shape'] = img.shape
-        results['scale_factor'] = 1.0
-        num_channels = 1 if len(img.shape) < 3 else img.shape[2]
-        results['img_norm_cfg'] = dict(
-            mean=np.zeros(num_channels, dtype=np.float32),
-            std=np.ones(num_channels, dtype=np.float32),
-            to_rgb=False)
+        for i, r in enumerate(results_tmp):
+            if r.get('img_prefix') is not None:
+                filename = osp.join(r['img_prefix'],
+                                    r['img_info']['filename'])
+            else:
+                filename = r['img_info']['filename']
+            img_bytes = self.file_client.get(filename)
+            img = mmcv.imfrombytes(
+                img_bytes, flag=self.color_type, backend=self.imdecode_backend)
+            if self.to_float32:
+                img = img.astype(np.float32)
+
+            results_tmp[i]['filename'] = filename
+            results_tmp[i]['ori_filename'] = r['img_info']['filename']
+            results_tmp[i]['img'] = img
+            results_tmp[i]['img_shape'] = img.shape
+            results_tmp[i]['ori_shape'] = img.shape
+            # Set initial values for default meta_keys
+            results_tmp[i]['pad_shape'] = img.shape
+            results_tmp[i]['scale_factor'] = 1.0
+            num_channels = 1 if len(img.shape) < 3 else img.shape[2]
+            results_tmp[i]['img_norm_cfg'] = dict(
+                mean=np.zeros(num_channels, dtype=np.float32),
+                std=np.ones(num_channels, dtype=np.float32),
+                to_rgb=False)
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]
         return results
 
     def __repr__(self):
@@ -106,11 +121,13 @@ class LoadAnnotations(object):
     def __init__(self,
                  reduce_zero_label=False,
                  file_client_args=dict(backend='disk'),
-                 imdecode_backend='pillow'):
+                 imdecode_backend='pillow',
+                 keys=None):
         self.reduce_zero_label = reduce_zero_label
         self.file_client_args = file_client_args.copy()
         self.file_client = None
         self.imdecode_backend = imdecode_backend
+        self.keys = keys
 
     def __call__(self, results):
         """Call function to load multiple types annotations.
@@ -125,27 +142,40 @@ class LoadAnnotations(object):
         if self.file_client is None:
             self.file_client = mmcv.FileClient(**self.file_client_args)
 
-        if results.get('seg_prefix', None) is not None:
-            filename = osp.join(results['seg_prefix'],
-                                results['ann_info']['seg_map'])
+        if self.keys is None:
+            results_tmp = [results]
         else:
-            filename = results['ann_info']['seg_map']
-        img_bytes = self.file_client.get(filename)
-        gt_semantic_seg = mmcv.imfrombytes(
-            img_bytes, flag='unchanged',
-            backend=self.imdecode_backend).squeeze().astype(np.uint8)
-        # modify if custom classes
-        if results.get('label_map', None) is not None:
-            for old_id, new_id in results['label_map'].items():
-                gt_semantic_seg[gt_semantic_seg == old_id] = new_id
-        # reduce zero_label
-        if self.reduce_zero_label:
-            # avoid using underflow conversion
-            gt_semantic_seg[gt_semantic_seg == 0] = 255
-            gt_semantic_seg = gt_semantic_seg - 1
-            gt_semantic_seg[gt_semantic_seg == 254] = 255
-        results['gt_semantic_seg'] = gt_semantic_seg
-        results['seg_fields'].append('gt_semantic_seg')
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            if r.get('seg_prefix', None) is not None:
+                filename = osp.join(r['seg_prefix'],
+                                    r['ann_info']['seg_map'])
+            else:
+                filename = r['ann_info']['seg_map']
+            img_bytes = self.file_client.get(filename)
+            gt_semantic_seg = mmcv.imfrombytes(
+                img_bytes, flag='unchanged',
+                backend=self.imdecode_backend).squeeze().astype(np.uint8)
+            # modify if custom classes
+            if r.get('label_map', None) is not None:
+                for old_id, new_id in r['label_map'].items():
+                    gt_semantic_seg[gt_semantic_seg == old_id] = new_id
+            # reduce zero_label
+            if self.reduce_zero_label:
+                # avoid using underflow conversion
+                gt_semantic_seg[gt_semantic_seg == 0] = 255
+                gt_semantic_seg = gt_semantic_seg - 1
+                gt_semantic_seg[gt_semantic_seg == 254] = 255
+            results_tmp[i]['gt_semantic_seg'] = gt_semantic_seg
+            results_tmp[i]['seg_fields'].append('gt_semantic_seg')
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]        
         return results
 
     def __repr__(self):
