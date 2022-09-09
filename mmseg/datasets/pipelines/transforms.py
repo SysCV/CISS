@@ -1098,7 +1098,7 @@ class FDA(object):
                 results[src]['img_stylized'] = self.fda_source_to_target_np(
                     results[src]['img'],
                     results[trg]['img'],
-                    self.bandwidth)
+                    bandwidth=self.bandwidth)
                 results[src]['bandwidth'] = self.bandwidth
         return results
 
