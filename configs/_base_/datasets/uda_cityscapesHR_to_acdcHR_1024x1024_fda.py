@@ -25,8 +25,8 @@ cityscapes_acdc_train_pipeline = [
     dict(type='Normalize', **img_norm_cfg, keys=['source', 'target']),
     dict(type='Pad', size=crop_size, pad_val=0, seg_pad_val=255, keys=['source', 'target']),
     dict(type='DefaultFormatBundle', keys=['source', 'target']),
-    dict(type='Collect', keys=['img', 'img_stylized', 'gt_semantic_seg'], parts=['source']),
-    dict(type='Collect', keys=['img', 'img_stylized'], parts=['target']),
+    # dict(type='Collect', keys=['img', 'img_stylized'], parts=['target']),
+    dict(type='Collect', keys=[['img', 'img_stylized', 'gt_semantic_seg'], ['img', 'img_stylized']], parts=['source', 'target']),
 ]
 # acdc_train_pipeline = [
 #     dict(type='LoadImageFromFile'),
