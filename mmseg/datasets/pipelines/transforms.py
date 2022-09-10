@@ -5,6 +5,7 @@
 # 3) Include Fourier domain adaptation (FDA) transform.
 
 import mmcv
+from mmcv.utils import Timer
 import numpy as np
 from mmcv.utils import deprecated_api_warning, is_tuple_of
 from numpy import random
@@ -1026,12 +1027,9 @@ class FDA(object):
     def __init__(self, bandwidth, keys=None):
         self.bandwidth = bandwidth
         self.keys = keys
+        self.timer = Timer()
 
-    def low_freq_mutate_np(self, amp_src, amp_trg):
-        a_src = np.fft.fftshift(amp_src, axes=(-3, -2))
-        # a_src = np.fft.fftshift(amp_src, axes=(-2, -1))
-        a_trg = np.fft.fftshift(amp_trg, axes=(-3, -2))
-        # a_trg = np.fft.fftshift(amp_trg, axes=(-2, -1))
+    def low_freq_mutate_np(self, a_src, a_trg):
 
         h, w, _ = a_src.shape
         # _, h, w = a_src.shape
@@ -1056,40 +1054,35 @@ class FDA(object):
         w2_trg = c_trg_w + b + 1
 
         a_src[h1:h2,w1:w2,:] = a_trg[h1_trg:h2_trg,w1_trg:w2_trg,:]
-        # a_src[:,h1:h2,w1:w2] = a_trg[:,h1_trg:h2_trg,w1_trg:w2_trg]
         a_src = np.fft.ifftshift(a_src, axes=(-3, -2))
-        # a_src = np.fft.ifftshift(a_src, axes=(-2, -1))
         return a_src
 
     def fda_source_to_target_np(self, src_img, trg_img):
         # exchange magnitude
         # input: src_img, trg_img
 
-        src_img_np = src_img #.cpu().numpy()
-        trg_img_np = trg_img #.cpu().numpy()
-
-        print(src_img_np.shape)
-        print(trg_img_np.shape)
+        print(src_img.shape)
+        print(trg_img.shape)
 
         # get fft of both source and target
-        fft_src_np = np.fft.fft2(src_img_np, axes=(-3, -2))
-        # fft_src_np = np.fft.fft2(src_img_np, axes=(-2, -1))
-        fft_trg_np = np.fft.fft2(trg_img_np, axes=(-3, -2))
-        # fft_trg_np = np.fft.fft2(trg_img_np, axes=(-2, -1))
+        fft_src_np = np.fft.fft2(src_img, axes=(-3, -2))
+        fft_trg_np = np.fft.fft2(trg_img, axes=(-3, -2))
 
         # extract amplitude and phase of both ffts
         amp_src, pha_src = np.abs(fft_src_np), np.angle(fft_src_np)
         amp_trg, pha_trg = np.abs(fft_trg_np), np.angle(fft_trg_np)
+        
+        a_src = np.fft.fftshift(amp_src, axes=(-3, -2))
+        a_trg = np.fft.fftshift(amp_trg, axes=(-3, -2))
 
         # mutate the amplitude part of source with target
-        amp_src_ = self.low_freq_mutate_np(amp_src, amp_trg)
+        amp_src_ = self.low_freq_mutate_np(a_src, a_trg)
 
         # mutated fft of source
         fft_src_ = amp_src_ * np.exp(1j * pha_src)
 
         # get the mutated image
         src_in_trg = np.fft.ifft2(fft_src_, axes=(-3, -2))
-        # src_in_trg = np.fft.ifft2(fft_src_, axes=(-2, -1))
         src_in_trg = np.real(src_in_trg)
 
         return src_in_trg
@@ -1105,6 +1098,7 @@ class FDA(object):
                 result dict.
         """
 
+        print('Time since last check: {:6.3f} sec.'.format(self.timer.since_last_check()))
         if self.keys is not None:
             for k in self.keys:
                 src, trg = k
@@ -1112,6 +1106,7 @@ class FDA(object):
                     results[src]['img'],
                     results[trg]['img'])
                 results[src]['bandwidth'] = self.bandwidth
+        print('Time spent on FDA: {:6.3f} sec.'.format(self.timer.since_last_check()))
         return results
 
     def __repr__(self):
