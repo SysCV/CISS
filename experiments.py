@@ -591,6 +591,7 @@ def generate_experiment_cfgs(id):
         dec, backbone = 'daformer_sepaspp', 'mitb5'
         uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized', 0.01, False
         inference = 'slide'
+        workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
             (cs2acdc, f'hrda1-512-0.1_{dec}', None),
         ]:
