@@ -16,10 +16,10 @@
 #SBATCH --gpus=rtx_3090:1
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_51-csHR2acdcHR_fda_diss_src_cestylized-slurm-02.o
+#SBATCH --output=../logs/exp_51-csHR2acdcHR_fda_diss_src_cestylized-slurm-25.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_51-csHR2acdcHR_fda_diss_src_cestylized-slurm-02.e
+#SBATCH --error=../logs/exp_51-csHR2acdcHR_fda_diss_src_cestylized-slurm-25.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
@@ -49,6 +49,8 @@ python tools/convert_datasets/cityscapes.py data/cityscapes --nproc 8
 python run_experiments.py --exp ${EXP_ID}
 
 # Perform finalization operations.
+# Deactivate virtual environment for DISS.
+deactivate
 ./experiments/scripts/finalization.sh
 
 /bin/echo Finished on: `date`

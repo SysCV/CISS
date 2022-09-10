@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Deactivate virtual environment for DISS.
-deactivate
-
 # Remove symlinks in the data directory of the repository to the data in the compute
 # node scratch.
 rm ${SOURCE_DIR}/data/${SOURCE_DATASET}
