@@ -710,8 +710,8 @@ class CentralCrop(object):
         """Get the central crop bounding box."""
         margin_h = max(img.shape[0] - self.crop_size[0], 0)
         margin_w = max(img.shape[1] - self.crop_size[1], 0)
-        offset_h = np.floor(margin_h / 2)
-        offset_w = np.floor(margin_w / 2)
+        offset_h = np.floor(margin_h / 2).astype(int)
+        offset_w = np.floor(margin_w / 2).astype(int)
         crop_y1, crop_y2 = offset_h, offset_h + self.crop_size[0]
         crop_x1, crop_x2 = offset_w, offset_w + self.crop_size[1]
 
