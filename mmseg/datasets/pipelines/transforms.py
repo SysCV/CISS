@@ -692,6 +692,87 @@ class RandomCrop(object):
 
 
 @PIPELINES.register_module()
+class CentralCrop(object):
+    """Central crop the image & seg.
+
+    Args:
+        crop_size (tuple): Expected size after cropping, (h, w).
+        cat_max_ratio (float): The maximum ratio that single category could
+            occupy.
+    """
+
+    def __init__(self, crop_size, keys=None):
+        assert crop_size[0] > 0 and crop_size[1] > 0
+        self.crop_size = crop_size
+        self.keys = keys
+
+    def get_crop_bbox(self, img):
+        """Get the central crop bounding box."""
+        margin_h = max(img.shape[0] - self.crop_size[0], 0)
+        margin_w = max(img.shape[1] - self.crop_size[1], 0)
+        offset_h = np.floor(margin_h / 2)
+        offset_w = np.floor(margin_w / 2)
+        crop_y1, crop_y2 = offset_h, offset_h + self.crop_size[0]
+        crop_x1, crop_x2 = offset_w, offset_w + self.crop_size[1]
+
+        return crop_y1, crop_y2, crop_x1, crop_x2
+
+    def crop(self, img, crop_bbox):
+        """Crop from ``img``"""
+        crop_y1, crop_y2, crop_x1, crop_x2 = crop_bbox
+        img = img[crop_y1:crop_y2, crop_x1:crop_x2, ...]
+        return img
+
+    def __call__(self, results):
+        """Call function to randomly crop images, semantic segmentation maps.
+
+        Args:
+            results (dict): Result dict from loading pipeline.
+
+        Returns:
+            dict: Randomly cropped results, 'img_shape' key in result dict is
+                updated according to crop size.
+        """
+
+        if self.keys is None:
+            results_tmp = [results]
+        else:
+            results_tmp = []
+            for k in self.keys:
+                results_tmp.append(results[k])
+        
+        for i, r in enumerate(results_tmp):
+            img = r['img']
+            crop_bbox = self.get_crop_bbox(img)
+            # crop the image
+            img = self.crop(img, crop_bbox)
+            img_shape = img.shape
+            results_tmp[i]['img'] = img
+            results_tmp[i]['img_shape'] = img_shape
+
+            # crop the stylized image
+            if 'img_stylized' in r:
+                img_stylized = r['img_stylized']
+                img_stylized = self.crop(img_stylized, crop_bbox)
+                results_tmp[i]['img_stylized'] = img_stylized
+            
+            # crop semantic seg
+            for key in r.get('seg_fields', []):
+                results_tmp[i][key] = self.crop(r[key], crop_bbox)
+
+        if self.keys is None:
+            results = results_tmp[0]
+        else:
+            for i, k in enumerate(self.keys):
+                results[k] = results_tmp[i]
+        
+        return results
+
+    def __repr__(self):
+        return self.__class__.__name__ + f'(crop_size={self.crop_size})'
+
+
+@PIPELINES.register_module()
 class RandomRotate(object):
     """Rotate the image & seg.
 
