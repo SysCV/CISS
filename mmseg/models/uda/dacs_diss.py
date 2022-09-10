@@ -71,8 +71,8 @@ class DACSDISS(DACS):
 
     def forward_train(self,
                       img,
-                      img_stylized,
                       img_metas,
+                      img_stylized,
                       gt_semantic_seg,
                       target_img,
                       target_img_stylized,
@@ -324,7 +324,7 @@ class DACSDISS(DACS):
                 # subplotimg(axs[0][3], pred_u_s[j], "Seg Pred",
                 #            cmap="cityscapes")
                 subplotimg(
-                    axs[1][3], mixed_lbl[j], 'Seg Targ', cmap='cityscapes')
+                    axs[1][3], mixed_lbl[0][j], 'Seg Targ', cmap='cityscapes')
                 # subplotimg(
                 #     axs[0][3], pseudo_weight[j], 'Pseudo W.', vmin=0, vmax=1)
                 if self.debug_fdist_mask is not None:
@@ -346,7 +346,7 @@ class DACSDISS(DACS):
                                  f'{(self.local_iter + 1):06d}_{j}.png'))
                 plt.close()
 
-            if (seg_debug['Source'] is not None or seg_debug['Source Stylized'] is not None) and seg_debug:
+            if (seg_debug.get('Source') is not None or seg_debug.get('Source Stylized') is not None) and seg_debug:
                 rows =\
                     1 +\
                     int(self.stylization['source']['ce_original']) +\
