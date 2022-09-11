@@ -622,6 +622,90 @@ def generate_experiment_cfgs(id):
                 gpu_model = 'NVIDIATITANRTX'
                 cfg = config_from_vars()
                 cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------
+    # DISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # --------------------------------------------------------------------------------------------
+    elif id == 52:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        inference = 'slide'
+        batch_size = 1
+        workers_per_gpu = 32
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------
+    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # --------------------------------------------------------------------------------------------
+    elif id == 53:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        inference = 'slide'
+        batch_size = 1
+        workers_per_gpu = 32
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------
+    # DISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
+    # --------------------------------------------------------------------------------------------
+    elif id == 54:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig_inv', 0.01, False
+        inference = 'slide'
+        batch_size = 1
+        workers_per_gpu = 32
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # ---------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
+    # ---------------------------------------------------------------------------------------------------------------
+    elif id == 55:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10', 0.01, False
+        inference = 'slide'
+        batch_size = 1
+        workers_per_gpu = 32
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
     else:
         raise NotImplementedError('Unknown id {}'.format(id))
 
