@@ -12,7 +12,7 @@ uda = dict(
             ce_original=False,
             ce_stylized=True,
             inv=True,
-        )
+        ),
         inv_loss = dict(
             weight = 10.0,
         )
