@@ -271,6 +271,28 @@ def generate_experiment_cfgs(id):
             cfg.setdefault('uda', {})
             cfg['uda']['stylization'] = stylization
 
+        # Setup data root directories.
+        if os.environ.get('DIR_SOURCE_DATASET') is not None:
+            data_root_source = os.environ['DIR_SOURCE_DATASET'] + os.sep
+            cfg.setdefault('data', {}).setdefault('train', {})
+            if stylization is not None:
+                cfg['data']['train']['data_root_source'] = data_root_source
+            else:
+                cfg['data']['train'].setdefault('source', {})
+                cfg['data']['train']['source']['data_root'] = data_root_source
+        if os.environ.get('DIR_TARGET_DATASET') is not None:
+            data_root_target = os.environ['DIR_TARGET_DATASET'] + os.sep
+            cfg.setdefault('data', {}).setdefault('train', {})
+            if stylization is not None:
+                cfg['data']['train']['data_root_target'] = data_root_target
+            else:
+                cfg['data']['train'].setdefault('target', {})
+                cfg['data']['train']['target']['data_root'] = data_root_target
+            cfg.setdefault('data', {}).setdefault('val', {})
+            cfg['data']['val']['data_root'] = data_root_target
+            cfg.setdefault('data', {}).setdefault('test', {})
+            cfg['data']['test']['data_root'] = data_root_target
+        
         # Setup optimizer and schedule
         if 'dacs' in uda or 'minent' in uda or 'advseg' in uda:
             cfg['optimizer_config'] = None  # Don't use outer optimizer
@@ -591,7 +613,7 @@ def generate_experiment_cfgs(id):
         dec, backbone = 'daformer_sepaspp', 'mitb5'
         uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized', 0.01, False
         inference = 'slide'
-        workers_per_gpu = 64
+        workers_per_gpu = 32
         for dataset, architecture, sync_crop_size in [
             (cs2acdc, f'hrda1-512-0.1_{dec}', None),
         ]:

@@ -21,8 +21,8 @@ tar -I pigz -xf ${TAR_TARGET_DATASET} -C ${DIR_TARGET_DATASET}/
 
 # Create symlinks in the data directory of the repository to the data in the compute
 # node scratch.
-ln -s ${DIR_SOURCE_DATASET} ${SOURCE_DIR}/data
-ln -s ${DIR_TARGET_DATASET} ${SOURCE_DIR}/data
+# ln -s ${DIR_SOURCE_DATASET} ${SOURCE_DIR}/data
+# ln -s ${DIR_TARGET_DATASET} ${SOURCE_DIR}/data
 
 # Create temporary directory for storing the results of the experiment.
 # mkdir ${3}

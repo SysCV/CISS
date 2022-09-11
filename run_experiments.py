@@ -96,6 +96,8 @@ if __name__ == '__main__':
                 cfg['checkpoint_config'] = dict(
                     by_epoch=False, interval=100, save_last=False)
             # Generate Config File
+            # cfg['evaluation'] = dict(interval=50, metric='mIoU')
+            # cfg.setdefault('log_config', {})['interval'] = 1
             cfg['name'] = f'{datetime.now().strftime("%y%m%d_%H%M")}_' \
                           f'{cfg["name"]}_{str(uuid.uuid4())[:5]}'
             cfg['work_dir'] = os.path.join('work_dirs', exp_name, cfg['name'])

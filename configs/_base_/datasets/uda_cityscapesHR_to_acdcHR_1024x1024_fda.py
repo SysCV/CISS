@@ -16,7 +16,7 @@ cityscapes_acdc_train_pipeline = [
     dict(type='LoadAnnotations', keys=['source']),
     dict(type='Resize', img_scale=(2048, 1024), keys=['source']),
     dict(type='Resize', img_scale=(1920, 1080), keys=['target']),
-    dict(type='CentralCrop', crop_size=(1920, 1024), keys=['source', 'target']),
+    dict(type='CentralCrop', crop_size=(1024, 1920), keys=['source', 'target']),
     dict(type='FDA', bandwidth=0.01, keys=[('source', 'target'), ('target', 'source')]),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75, keys=['source']),
     dict(type='RandomCrop', crop_size=crop_size, keys=['target']),
@@ -54,12 +54,12 @@ test_pipeline = [
             dict(type='RandomFlip'),
             dict(type='Normalize', **img_norm_cfg),
             dict(type='ImageToTensor', keys=['img']),
-            dict(type='Collect', keys=['img']),
+            dict(type='Collect', keys=[['img']]),
         ])
 ]
 data = dict(
     samples_per_gpu=2,
-    workers_per_gpu=4,
+    workers_per_gpu=32,
     train=dict(
         type='UDADatasetDual',
         source='Cityscapes',
