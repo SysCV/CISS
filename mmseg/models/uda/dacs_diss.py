@@ -63,11 +63,40 @@ class DACSDISS(DACS):
         self.stylization['source'] = self.stylization.get('source', {})
         self.stylization['source']['ce_original'] = self.stylization['source'].get('ce_original', False)
         self.stylization['source']['ce_stylized'] = self.stylization['source'].get('ce_stylized', False)
+        self.stylization['source']['inv'] = self.stylization['source'].get('inv', False)
         assert self.stylization['source']['ce_original'] or self.stylization['source']['ce_stylized']
         self.stylization['target'] = cfg['stylize'].get('target', {})
         self.stylization['target']['pseudolabels'] = self.stylization['target'].get('pseudolabels', 'original')
         self.stylization['target']['ce'] = self.stylization['target'].get('ce', [('original', 'original')])
+        self.stylization['target']['inv'] = self.stylization['target'].get('inv', [])
         assert len(self.stylization['target']['ce']) > 0
+        self.stylization['inv_loss'] = self.stylization.get('inv_loss', {})
+        self.stylization['inv_loss']['norm'] = self.stylization['inv_loss'].get('norm', 'l2')
+        self.stylization['inv_loss']['weight'] = self.stylization['inv_loss'].get('weight', 1.0)
+
+    def calculate_feature_invariance_loss(self,
+                                          feats_input,
+                                          feats_ref):
+        if isinstance(feats_input, list):
+            # Multi-scale features from HRDA encoder. Large scale comes first, small scale comes second.
+            losses = []
+            hr_loss_w = self.get_model().decode_head.hr_loss_weight
+            for i in range(2):
+                if self.stylization['inv_loss']['norm'] == 'l2':
+                    losses.append(torch.nn.functional.mse_loss(feats_input[i], feats_ref[i], reduction='mean'))
+                elif self.stylization['inv_loss']['norm'] == 'l1':
+                    losses.append(torch.nn.functional.l1_loss(feats_input[i], feats_ref[i], reduction='mean'))
+            loss = hr_loss_w * losses[1] + (1.0 - hr_loss_w) * losses[0]
+        else:
+            # Features only from one scale.
+            if self.stylization['inv_loss']['norm'] == 'l2':
+                loss = torch.nn.functional.mse_loss(feats_input, feats_ref, reduction='mean')
+            elif self.stylization['inv_loss']['norm'] == 'l1':
+                loss = torch.nn.functional.l1_loss(feats_input, feats_ref, reduction='mean')
+        feature_invariance_loss = self.stylization['inv_loss']['weight'] * loss
+        inv_loss, inv_log = self._parse_losses({'inv_loss': feature_invariance_loss})
+        inv_log.pop('loss', None)
+        return inv_loss, inv_log
 
     def forward_train(self,
                       img,
@@ -123,14 +152,17 @@ class DACSDISS(DACS):
 
         # Train on source images.
         # 1) Train on original source images.
-        if self.stylization['source']['ce_original']:
+        if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
             clean_losses = self.get_model().forward_train(
-                img, img_metas, gt_semantic_seg, return_feat=True)
+                img, img_metas, gt_semantic_seg, return_feat=True,
+                return_seg_loss=self.stylization['source']['ce_original'])
             src_feat = clean_losses.pop('features')
             seg_debug['Source'] = self.get_model().decode_head.debug_output
+            clean_losses = add_prefix(clean_losses, 'src_orig')
             clean_loss, clean_log_vars = self._parse_losses(clean_losses)
             log_vars.update(clean_log_vars)
-            clean_loss.backward(retain_graph=self.enable_fdist)
+            if self.stylization['source']['ce_original']:
+                clean_loss.backward(retain_graph=(self.enable_fdist or self.stylization['source']['inv']))
             if self.print_grad_magnitude:
                 params = self.get_model().backbone.parameters()
                 seg_grads = [
@@ -140,14 +172,17 @@ class DACSDISS(DACS):
                 mmcv.print_log(f'Seg. Grad.: {grad_mag}', 'mmseg')
         
         # 2) Train on stylized source images.
-        if self.stylization['source']['ce_stylized']:
+        if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
             clean_stylized_losses = self.get_model().forward_train(
-                img_stylized, img_metas, gt_semantic_seg, return_feat=True)
+                img_stylized, img_metas, gt_semantic_seg, return_feat=True,
+                return_seg_loss=self.stylization['source']['ce_stylized']))
             src_feat_stylized = clean_stylized_losses.pop('features')
             seg_debug['Source Stylized'] = self.get_model().decode_head.debug_output
+            clean_stylized_losses = add_prefix(clean_stylized_losses, 'src_stylized')
             clean_stylized_loss, clean_stylized_log_vars = self._parse_losses(clean_stylized_losses)
             log_vars.update(clean_stylized_log_vars)
-            clean_stylized_loss.backward(retain_graph=self.enable_fdist)
+            if self.stylization['source']['ce_stylized']:
+                clean_stylized_loss.backward(retain_graph=(self.enable_fdist or self.stylization['source']['inv']))
             if self.print_grad_magnitude:
                 params = self.get_model().backbone.parameters()
                 seg_stylized_grads = [
@@ -158,14 +193,13 @@ class DACSDISS(DACS):
                 grad_mag = calc_grad_magnitude(seg_stylized_grads)
                 mmcv.print_log(f'Seg. Grad. Stylized: {grad_mag}', 'mmseg')
 
-        # ImageNet feature distance
+        # 3) ImageNet feature distance
         if self.enable_fdist:
             # on original source images
-            if self.stylization['source']['ce_original']:
-                feat_loss, feat_log = self.calc_feat_dist(img, gt_semantic_seg,
-                                                        src_feat)
+            if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
+                feat_loss, feat_log = self.calc_feat_dist(img, gt_semantic_seg, src_feat)
                 log_vars.update(add_prefix(feat_log, 'src'))
-                feat_loss.backward()
+                feat_loss.backward(retain_graph=(self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']))
                 if self.print_grad_magnitude:
                     params = self.get_model().backbone.parameters()
                     fd_grads = [
@@ -178,10 +212,10 @@ class DACSDISS(DACS):
                     grad_mag = calc_grad_magnitude(fd_grads)
                     mmcv.print_log(f'Fdist Grad.: {grad_mag}', 'mmseg')
             # on stylized source images
-            if self.stylization['source']['ce_stylized']:
+            if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
                 feat_stylized_loss, feat_stylized_log = self.calc_feat_dist(img_stylized, gt_semantic_seg, src_feat_stylized)
                 log_vars.update(add_prefix(feat_stylized_log, 'src_stylized'))
-                feat_stylized_loss.backward()
+                feat_stylized_loss.backward(retain_graph=self.stylization['source']['inv'])
                 if self.print_grad_magnitude:
                     params = self.get_model().backbone.parameters()
                     fd_stylized_grads = [
@@ -193,15 +227,24 @@ class DACSDISS(DACS):
                         fd_stylized_grads = [g2 - g1 for g1, g2 in zip(seg_stylized_grads, fd_stylized_grads)]
                     grad_mag = calc_grad_magnitude(fd_stylized_grads)
                     mmcv.print_log(f'Fdist Grad.: {grad_mag}', 'mmseg')
-        if self.stylization['source']['ce_original']:
+        
+        # 4) Feature invariance loss between original and stylized versions of source images.
+        if self.stylization['source']['inv']:
+            inv_src_loss, inv_src_log = self.calculate_feature_invariance_loss(src_feat, src_feat_stylized)
+            log_vars.update(add_prefix(inv_src_log, 'src'))
+            inv_src_loss.backward()
+
+        if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
             del src_feat, clean_loss
-        if self.stylization['source']['ce_stylized']:
+        if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
             del src_feat_stylized, clean_stylized_loss
         if self.enable_fdist:
-            if self.stylization['source']['ce_original']:
+            if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
                 del feat_loss
-            if self.stylization['source']['ce_stylized']:
+            if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
                 del feat_stylized_loss
+        if self.stylization['source']['inv']:
+            del inv_src_loss
 
         # Generate pseudo-label
         for m in self.get_ema_model().modules():
@@ -244,6 +287,9 @@ class DACSDISS(DACS):
         mixed_img, mixed_lbl = [None] * len(self.stylization['target']['ce']), [None] * len(self.stylization['target']['ce'])
         mix_masks = [None] * len(self.stylization['target']['ce'])
         mix_losses = [None] * len(self.stylization['target']['ce'])
+        mix_inv_logs = [None] * len(self.stylization['target']['inv'])
+        are_feats_cached = [[False, False] for i in range(len(self.stylization['target']['inv']))]
+        feats_cached = [[None, None] for i in range(len(self.stylization['target']['inv']))]
         for j, s in enumerate(self.stylization['target']['ce']):
             mixed_img[j], mixed_lbl[j] = [None] * batch_size, [None] * batch_size
             mix_masks[j] = get_class_masks(gt_semantic_seg)
@@ -271,13 +317,30 @@ class DACSDISS(DACS):
             mixed_lbl[j] = torch.cat(mixed_lbl[j])
 
             # Train on mixed images
+            return_feat = False
+            for t in self.stylization['target']['inv']:
+                if s in t:
+                    return_feat = True
+                    break
             mix_losses[j] = self.get_model().forward_train(
-                mixed_img[j], img_metas, mixed_lbl[j], pseudo_weight, return_feat=False)
+                mixed_img[j], img_metas, mixed_lbl[j], pseudo_weight, return_feat=return_feat)
+            if return_feat:
+                feats = mix_losses[j].pop('features')
+                for i, t in enumerate(self.stylization['target']['inv']):
+                    for l, w in enumerate(t):
+                        if s == w and not are_feats_cached[i][l]:
+                            feats_cached[i][l] = feats
+                            are_feats_cached[i][l] = True
+
             seg_debug[' '.join(['Mix', style_source, style_target])] = self.get_model().decode_head.debug_output
             mix_losses[j] = add_prefix(mix_losses[j], '_'.join(['mix', style_source, style_target]))
             mix_loss, mix_log_vars = self._parse_losses(mix_losses[j])
             log_vars.update(mix_log_vars)
             mix_loss.backward()
+        for j, t in enumerate(self.stylization['target']['inv']):
+            mix_inv_loss, mix_inv_logs[j] = self.calculate_feature_invariance_loss(feats_cached[j][0], feats_cached[j][1])
+            log_vars.update(add_prefix(mix_inv_logs[j], '_'.join(['mix', ''.join(t[0][:]), ''.join(t[1][:])])))
+            mix_inv_loss.backward()
         del gt_pixel_weight
 
         if self.local_iter % self.debug_img_interval == 0:
