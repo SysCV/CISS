@@ -246,7 +246,7 @@ class HRDAEncoderDecoder(EncoderDecoder):
             loss_decode = self._decode_head_forward_train(mres_feats, img_metas,
                                                         gt_semantic_seg,
                                                         seg_weight)
-        losses.update(loss_decode)
+            losses.update(loss_decode)
 
         if self.decode_head.debug and prob_vis is not None:
             self.decode_head.debug_output['Crop Prob.'] = prob_vis

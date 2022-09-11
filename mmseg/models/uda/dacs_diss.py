@@ -156,12 +156,12 @@ class DACSDISS(DACS):
             clean_losses = self.get_model().forward_train(
                 img, img_metas, gt_semantic_seg, return_feat=True,
                 return_seg_loss=self.stylization['source']['ce_original'])
-            src_feat = clean_losses.pop('features')
-            seg_debug['Source'] = self.get_model().decode_head.debug_output
-            clean_losses = add_prefix(clean_losses, 'src_orig')
-            clean_loss, clean_log_vars = self._parse_losses(clean_losses)
-            log_vars.update(clean_log_vars)
+            src_feat = clean_losses.pop('features')            
             if self.stylization['source']['ce_original']:
+                seg_debug['Source'] = self.get_model().decode_head.debug_output
+                clean_losses = add_prefix(clean_losses, 'src_orig')
+                clean_loss, clean_log_vars = self._parse_losses(clean_losses)
+                log_vars.update(clean_log_vars)
                 clean_loss.backward(retain_graph=(self.enable_fdist or self.stylization['source']['inv']))
             if self.print_grad_magnitude:
                 params = self.get_model().backbone.parameters()
@@ -175,13 +175,13 @@ class DACSDISS(DACS):
         if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
             clean_stylized_losses = self.get_model().forward_train(
                 img_stylized, img_metas, gt_semantic_seg, return_feat=True,
-                return_seg_loss=self.stylization['source']['ce_stylized']))
+                return_seg_loss=self.stylization['source']['ce_stylized'])
             src_feat_stylized = clean_stylized_losses.pop('features')
-            seg_debug['Source Stylized'] = self.get_model().decode_head.debug_output
-            clean_stylized_losses = add_prefix(clean_stylized_losses, 'src_stylized')
-            clean_stylized_loss, clean_stylized_log_vars = self._parse_losses(clean_stylized_losses)
-            log_vars.update(clean_stylized_log_vars)
             if self.stylization['source']['ce_stylized']:
+                seg_debug['Source Stylized'] = self.get_model().decode_head.debug_output
+                clean_stylized_losses = add_prefix(clean_stylized_losses, 'src_stylized')
+                clean_stylized_loss, clean_stylized_log_vars = self._parse_losses(clean_stylized_losses)
+                log_vars.update(clean_stylized_log_vars)
                 clean_stylized_loss.backward(retain_graph=(self.enable_fdist or self.stylization['source']['inv']))
             if self.print_grad_magnitude:
                 params = self.get_model().backbone.parameters()
@@ -235,9 +235,13 @@ class DACSDISS(DACS):
             inv_src_loss.backward()
 
         if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
-            del src_feat, clean_loss
+            del src_feat
+        if self.stylization['source']['ce_original']:
+            del clean_loss
         if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
-            del src_feat_stylized, clean_stylized_loss
+            del src_feat_stylized
+        if self.stylization['source']['ce_stylized']:
+            del clean_stylized_loss
         if self.enable_fdist:
             if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
                 del feat_loss
