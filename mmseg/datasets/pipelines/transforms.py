@@ -1115,7 +1115,7 @@ class FDA(object):
         h, w, _ = a_src.shape
         # _, h, w = a_src.shape
         b = (np.floor(np.amin((h,w)) * self.bandwidth)).astype(int)
-        print(b)
+        # print(b)
         c_h = np.floor(h/2.0).astype(int)
         c_w = np.floor(w/2.0).astype(int)
         
@@ -1142,8 +1142,8 @@ class FDA(object):
         # exchange magnitude
         # input: src_img, trg_img
 
-        print(src_img.shape)
-        print(trg_img.shape)
+        # print(src_img.shape)
+        # print(trg_img.shape)
 
         # get fft of both source and target
         fft_src_np = np.fft.fft2(src_img, axes=(-3, -2))
@@ -1179,7 +1179,7 @@ class FDA(object):
                 result dict.
         """
 
-        print('Time since last check: {:6.3f} sec.'.format(self.timer.since_last_check()))
+        # print('Time since last check: {:6.3f} sec.'.format(self.timer.since_last_check()))
         if self.keys is not None:
             for k in self.keys:
                 src, trg = k
@@ -1187,7 +1187,7 @@ class FDA(object):
                     results[src]['img'],
                     results[trg]['img'])
                 results[src]['bandwidth'] = self.bandwidth
-        print('Time spent on FDA: {:6.3f} sec.'.format(self.timer.since_last_check()))
+        # print('Time spent on FDA: {:6.3f} sec.'.format(self.timer.since_last_check()))
         return results
 
     def __repr__(self):
