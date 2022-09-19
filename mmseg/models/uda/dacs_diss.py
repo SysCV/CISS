@@ -289,14 +289,13 @@ class DACSDISS(DACS):
 
         # Apply mixing
         mixed_img, mixed_lbl = [None] * len(self.stylization['target']['ce']), [None] * len(self.stylization['target']['ce'])
-        mix_masks = [None] * len(self.stylization['target']['ce'])
+        mix_masks = get_class_masks(gt_semantic_seg)
         mix_losses = [None] * len(self.stylization['target']['ce'])
         mix_inv_logs = [None] * len(self.stylization['target']['inv'])
         are_feats_cached = [[False, False] for i in range(len(self.stylization['target']['inv']))]
         feats_cached = [[None, None] for i in range(len(self.stylization['target']['inv']))]
         for j, s in enumerate(self.stylization['target']['ce']):
             mixed_img[j], mixed_lbl[j] = [None] * batch_size, [None] * batch_size
-            mix_masks[j] = get_class_masks(gt_semantic_seg)
             style_source = s[0]
             style_target = s[1]
             if style_source == 'stylized':
@@ -309,7 +308,7 @@ class DACSDISS(DACS):
                 target_img_input = target_img
 
             for i in range(batch_size):                
-                strong_parameters['mix'] = mix_masks[j][i]
+                strong_parameters['mix'] = mix_masks[i]
                 mixed_img[j][i], mixed_lbl[j][i] = strong_transform(
                     strong_parameters,
                     data=torch.stack((source_img_input[i], target_img_input[i])),
@@ -340,12 +339,44 @@ class DACSDISS(DACS):
             mix_losses[j] = add_prefix(mix_losses[j], '_'.join(['mix', style_source, style_target]))
             mix_loss, mix_log_vars = self._parse_losses(mix_losses[j])
             log_vars.update(mix_log_vars)
-            mix_loss.backward()
+            mix_loss.backward(retain_graph=(len(self.stylization['target']['inv']) > 0))
         for j, t in enumerate(self.stylization['target']['inv']):
+            for i in range(2):
+                if feats_cached[j][i] is None:
+                    mixed_img, mixed_lbl = [None] * batch_size, [None] * batch_size
+                    style_source = t[i][0]
+                    style_target = t[i][1]
+                    if style_source == 'stylized':
+                        source_img_input = img_stylized
+                    elif style_source == 'original':
+                        source_img_input = img
+                    if style_target == 'stylized':
+                        target_img_input = target_img_stylized
+                    elif style_target == 'original':
+                        target_img_input = target_img
+
+                    for b in range(batch_size):                
+                        strong_parameters['mix'] = mix_masks[b]
+                        mixed_img[b], mixed_lbl[b] = strong_transform(
+                            strong_parameters,
+                            data=torch.stack((source_img_input[b], target_img_input[b])),
+                            target=torch.stack((gt_semantic_seg[b][0], pseudo_label[b])))
+                        _, pseudo_weight[b] = strong_transform(
+                            strong_parameters,
+                            target=torch.stack((gt_pixel_weight[b], pseudo_weight[b])))
+                    mixed_img = torch.cat(mixed_img)
+                    mixed_lbl = torch.cat(mixed_lbl)
+                    mix_losses = self.get_model().forward_train(mixed_img,
+                                                                   img_metas,
+                                                                   mixed_lbl,
+                                                                   pseudo_weight,
+                                                                   return_feat=True,
+                                                                   return_seg_loss=False)
+                    feats_cached[j][i] = mix_losses.pop('features')
             mix_inv_loss, mix_inv_logs[j] = self.calculate_feature_invariance_loss(feats_cached[j][0], feats_cached[j][1])
             log_vars.update(add_prefix(mix_inv_logs[j], '_'.join(['mix', ''.join(t[0][:]), ''.join(t[1][:])])))
-            mix_inv_loss.backward()
-        del gt_pixel_weight
+            mix_inv_loss.backward(retain_graph=(j < len(self.stylization['target']['inv']) - 1))
+        del gt_pixel_weight, pseudo_weight
 
         if self.local_iter % self.debug_img_interval == 0:
             out_dir = os.path.join(self.train_cfg['work_dir'],
@@ -387,7 +418,7 @@ class DACSDISS(DACS):
                     cmap='cityscapes')
                 # subplotimg(axs[0][2], vis_mixed_img[j], 'Mixed Image')
                 subplotimg(
-                    axs[0][3], mix_masks[0][j][0], 'Domain Mask', cmap='gray')
+                    axs[0][3], mix_masks[j][0], 'Domain Mask', cmap='gray')
                 # subplotimg(axs[0][3], pred_u_s[j], "Seg Pred",
                 #            cmap="cityscapes")
                 subplotimg(
