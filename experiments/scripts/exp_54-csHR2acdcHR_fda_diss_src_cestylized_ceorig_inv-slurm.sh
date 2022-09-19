@@ -4,7 +4,7 @@
 #SBATCH --time=120:00:00
 #
 # Specify number of CPU cores.
-#SBATCH -n 32
+#SBATCH -n 8
 #
 # Specify memory limit per CPU core.
 #SBATCH --mem-per-cpu=8192
@@ -16,10 +16,10 @@
 #SBATCH --gpus=rtx_3090:1
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_54-csHR2acdcHR_fda_diss_src_cestylized_ceorig_inv-slurm.o
+#SBATCH --output=../logs/exp_54-csHR2acdcHR_fda_diss_src_cestylized_ceorig_inv-slurm-01.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_54-csHR2acdcHR_fda_diss_src_cestylized_ceorig_inv-slurm.e
+#SBATCH --error=../logs/exp_54-csHR2acdcHR_fda_diss_src_cestylized_ceorig_inv-slurm-01.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
