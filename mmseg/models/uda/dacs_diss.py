@@ -343,7 +343,7 @@ class DACSDISS(DACS):
         for j, t in enumerate(self.stylization['target']['inv']):
             for i in range(2):
                 if feats_cached[j][i] is None:
-                    mixed_img, mixed_lbl = [None] * batch_size, [None] * batch_size
+                    mixed_img_, mixed_lbl_ = [None] * batch_size, [None] * batch_size
                     style_source = t[i][0]
                     style_target = t[i][1]
                     if style_source == 'stylized':
@@ -357,18 +357,18 @@ class DACSDISS(DACS):
 
                     for b in range(batch_size):                
                         strong_parameters['mix'] = mix_masks[b]
-                        mixed_img[b], mixed_lbl[b] = strong_transform(
+                        mixed_img_[b], mixed_lbl_[b] = strong_transform(
                             strong_parameters,
                             data=torch.stack((source_img_input[b], target_img_input[b])),
                             target=torch.stack((gt_semantic_seg[b][0], pseudo_label[b])))
                         _, pseudo_weight[b] = strong_transform(
                             strong_parameters,
                             target=torch.stack((gt_pixel_weight[b], pseudo_weight[b])))
-                    mixed_img = torch.cat(mixed_img)
-                    mixed_lbl = torch.cat(mixed_lbl)
-                    mix_losses = self.get_model().forward_train(mixed_img,
+                    mixed_img_ = torch.cat(mixed_img_)
+                    mixed_lbl_ = torch.cat(mixed_lbl_)
+                    mix_losses = self.get_model().forward_train(mixed_img_,
                                                                    img_metas,
-                                                                   mixed_lbl,
+                                                                   mixed_lbl_,
                                                                    pseudo_weight,
                                                                    return_feat=True,
                                                                    return_seg_loss=False)
