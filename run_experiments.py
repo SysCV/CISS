@@ -44,6 +44,18 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--machine', type=str, choices=['local'], default='local')
+    parser.add_argument(
+        '--resume-from',
+        type=str,
+        default=None,
+        help='Path to checkpoint file',
+    )
+    parser.add_argument(
+        '--seed-to-resume-from',
+        type=int,
+        default=0,
+        help='Seed ID of experiment that needs resuming',
+    )
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--startup-test', action='store_true')
     args = parser.parse_args()
@@ -98,6 +110,9 @@ if __name__ == '__main__':
             # Generate Config File
             # cfg['evaluation'] = dict(interval=10, metric='mIoU')
             # cfg.setdefault('log_config', {})['interval'] = 1
+            # cfg['checkpoint_config'] = dict(by_epoch=False, interval=100)
+            if i == args.seed_to_resume_from:
+                cfg['resume_from'] = args.resume_from
             cfg['name'] = f'{datetime.now().strftime("%y%m%d_%H%M")}_' \
                           f'{cfg["name"]}_{str(uuid.uuid4())[:5]}'
             cfg['work_dir'] = os.path.join('work_dirs', exp_name, cfg['name'])
@@ -113,6 +128,8 @@ if __name__ == '__main__':
     if args.machine == 'local':
         for i, cfg in enumerate(cfgs):
             if args.startup_test and cfg['seed'] != 0:
+                continue
+            if i < args.seed_to_resume_from:
                 continue
             print('Run job {}'.format(cfg['name']))
             train.main([config_files[i]])
