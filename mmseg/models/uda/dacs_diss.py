@@ -125,7 +125,10 @@ class DACSDISS(DACS):
         """
         log_vars = {}
         batch_size = img.shape[0]
+        # print('Batch size in forward_train(): ', batch_size)
         dev = img.device
+        # print('Device for img: ', dev)
+        # print('Device for img: ' + dev)
 
         # Init/update ema model
         if self.local_iter == 0:

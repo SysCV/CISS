@@ -142,6 +142,7 @@ class DACS(UDADecorator):
         """
 
         optimizer.zero_grad()
+        # print('Batch size in train_step(): ', len(data_batch['img_metas']))
         log_vars = self(**data_batch)
         optimizer.step()
 
