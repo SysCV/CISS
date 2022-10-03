@@ -13,10 +13,10 @@ from mmcv.utils import print_log
 from prettytable import PrettyTable
 from torch.utils.data import Dataset
 
-from mmseg.core import eval_metrics
+from mmseg.core import eval_metrics, intersect_and_union, pre_eval_to_metrics
 from mmseg.utils import get_root_logger
 from .builder import DATASETS
-from .pipelines import Compose
+from .pipelines import Compose, LoadAnnotations
 
 
 @DATASETS.register_module()
@@ -88,7 +88,8 @@ class CustomDataset(Dataset):
                  ignore_index=255,
                  reduce_zero_label=False,
                  classes=None,
-                 palette=None):
+                 palette=None,
+                 gt_seg_map_loader_cfg=None):
         self.pipeline = Compose(pipeline)
         self.img_dir = img_dir
         self.img_suffix = img_suffix
@@ -102,6 +103,10 @@ class CustomDataset(Dataset):
         self.label_map = None
         self.CLASSES, self.PALETTE = self.get_classes_and_palette(
             classes, palette)
+        self.gt_seg_map_loader = LoadAnnotations(
+        ) if gt_seg_map_loader_cfg is None else LoadAnnotations(
+            **gt_seg_map_loader_cfg)
+
 
         # join paths if data_root is specified
         if self.data_root is not None:
@@ -233,6 +238,14 @@ class CustomDataset(Dataset):
     def format_results(self, results, **kwargs):
         """Place holder to format result to dataset specific output."""
 
+    def get_gt_seg_map_by_idx(self, index):
+        """Get one ground truth segmentation map for evaluation."""
+        ann_info = self.get_ann_info(index)
+        results = dict(ann_info=ann_info)
+        self.pre_pipeline(results)
+        self.gt_seg_map_loader(results)
+        return results['gt_semantic_seg']
+
     def get_gt_seg_maps(self, efficient_test=False):
         """Get ground truth segmentation maps for evaluation."""
         gt_seg_maps = []
@@ -246,6 +259,34 @@ class CustomDataset(Dataset):
             gt_seg_maps.append(gt_seg_map)
         return gt_seg_maps
 
+    def pre_eval(self, preds, indices):
+        """Collect eval result from each iteration.
+        Args:
+            preds (list[torch.Tensor] | torch.Tensor): the segmentation logit
+                after argmax, shape (N, H, W).
+            indices (list[int] | int): the prediction related ground truth
+                indices.
+        Returns:
+            list[torch.Tensor]: (area_intersect, area_union, area_prediction,
+                area_ground_truth).
+        """
+        # In order to compat with batch inference
+        if not isinstance(indices, list):
+            indices = [indices]
+        if not isinstance(preds, list):
+            preds = [preds]
+
+        pre_eval_results = []
+
+        for pred, index in zip(preds, indices):
+            seg_map = self.get_gt_seg_map_by_idx(index)
+            pre_eval_results.append(
+                intersect_and_union(pred, seg_map, len(self.CLASSES),
+                                    self.ignore_index, self.label_map,
+                                    self.reduce_zero_label))
+
+        return pre_eval_results
+    
     def get_classes_and_palette(self, classes=None, palette=None):
         """Get class names of current dataset.
 
@@ -314,11 +355,14 @@ class CustomDataset(Dataset):
                  metric='mIoU',
                  logger=None,
                  efficient_test=False,
+                 gt_seg_maps=None,
                  **kwargs):
         """Evaluate the dataset.
 
         Args:
-            results (list): Testing results of the dataset.
+            results (list[tuple[torch.Tensor]] | list[str]): per image pre_eval
+                 results or predict segmentation map for computing evaluation
+                 metric.
             metric (str | list[str]): Metrics to be evaluated. 'mIoU',
                 'mDice' and 'mFscore' are supported.
             logger (logging.Logger | None | str): Logger used for printing
@@ -334,20 +378,24 @@ class CustomDataset(Dataset):
         if not set(metric).issubset(set(allowed_metrics)):
             raise KeyError('metric {} is not supported'.format(metric))
         eval_results = {}
-        gt_seg_maps = self.get_gt_seg_maps(efficient_test)
-        if self.CLASSES is None:
-            num_classes = len(
-                reduce(np.union1d, [np.unique(_) for _ in gt_seg_maps]))
+        if mmcv.is_list_of(results, np.ndarray) or mmcv.is_list_of(results, str):
+            if gt_seg_maps is None:
+                gt_seg_maps = self.get_gt_seg_maps(efficient_test)
+            if self.CLASSES is None:
+                num_classes = len(
+                    reduce(np.union1d, [np.unique(_) for _ in gt_seg_maps]))
+            else:
+                num_classes = len(self.CLASSES)
+            ret_metrics = eval_metrics(
+                results,
+                gt_seg_maps,
+                num_classes,
+                self.ignore_index,
+                metric,
+                label_map=self.label_map,
+                reduce_zero_label=self.reduce_zero_label)
         else:
-            num_classes = len(self.CLASSES)
-        ret_metrics = eval_metrics(
-            results,
-            gt_seg_maps,
-            num_classes,
-            self.ignore_index,
-            metric,
-            label_map=self.label_map,
-            reduce_zero_label=self.reduce_zero_label)
+            ret_metrics = pre_eval_to_metrics(results, metric)
 
         if self.CLASSES is None:
             class_names = tuple(range(num_classes))

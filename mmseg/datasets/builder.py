@@ -140,6 +140,7 @@ def build_dataloader(dataset,
         sampler = None
         batch_size = num_gpus * samples_per_gpu
         num_workers = num_gpus * workers_per_gpu
+    print('Batch size: ', batch_size)
 
     init_fn = partial(
         worker_init_fn, num_workers=num_workers, rank=rank,

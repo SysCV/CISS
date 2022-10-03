@@ -95,9 +95,14 @@ def main(args):
     if args.gpu_ids is not None:
         cfg.gpu_ids = args.gpu_ids
     else:
-        cfg.gpu_ids = range(1) if args.gpus is None else range(args.gpus)
+        # cfg.gpu_ids = range(1) if args.gpus is None else range(args.gpus)
+        n_gpus = cfg.get('n_gpus', None)
+        cfg.gpu_ids = range(n_gpus) if n_gpus is not None else range(1)
 
     # init distributed env first, since logger depends on the dist info.
+    launcher = cfg.get('launcher', None)
+    if launcher is not None:
+        args.launcher = launcher
     if args.launcher == 'none':
         distributed = False
     else:

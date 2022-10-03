@@ -6,6 +6,7 @@ import torch.distributed as dist
 from mmcv.runner import DistEvalHook as _DistEvalHook
 from mmcv.runner import EvalHook as _EvalHook
 from torch.nn.modules.batchnorm import _BatchNorm
+import torch
 
 
 class EvalHook(_EvalHook):
@@ -23,21 +24,25 @@ class EvalHook(_EvalHook):
 
     greater_keys = ['mIoU', 'mAcc', 'aAcc']
 
-    def __init__(self, *args, by_epoch=False, efficient_test=False, **kwargs):
+    def __init__(self, *args, by_epoch=False, efficient_test=False, distributed_eval=False, pre_eval=False, **kwargs):
         super().__init__(*args, by_epoch=by_epoch, **kwargs)
         self.efficient_test = efficient_test
+        self.pre_eval = pre_eval
 
     def _do_evaluate(self, runner):
         """perform evaluation and save ckpt."""
         if not self._should_evaluate(runner):
             return
 
-        from mmseg.apis import single_gpu_test
+        from mmseg.apis import single_gpu_test#, multi_gpu_test
+        torch.cuda.empty_cache()
         results = single_gpu_test(
             runner.model,
             self.dataloader,
             show=False,
-            efficient_test=self.efficient_test)
+            efficient_test=self.efficient_test,
+            pre_eval=self.pre_eval)
+        runner.log_buffer.clear()
         runner.log_buffer.output['eval_iter_num'] = len(self.dataloader)
         key_score = self.evaluate(runner, results)
         if self.save_best:
@@ -59,9 +64,10 @@ class DistEvalHook(_DistEvalHook):
 
     greater_keys = ['mIoU', 'mAcc', 'aAcc']
 
-    def __init__(self, *args, by_epoch=False, efficient_test=False, **kwargs):
+    def __init__(self, *args, by_epoch=False, efficient_test=False, distributed_eval=False, pre_eval=False, **kwargs):
         super().__init__(*args, by_epoch=by_epoch, **kwargs)
         self.efficient_test = efficient_test
+        self.pre_eval = pre_eval
 
     def _do_evaluate(self, runner):
         """perform evaluation and save ckpt."""
@@ -86,12 +92,17 @@ class DistEvalHook(_DistEvalHook):
             tmpdir = osp.join(runner.work_dir, '.eval_hook')
 
         from mmseg.apis import multi_gpu_test
+        torch.cuda.empty_cache()
         results = multi_gpu_test(
             runner.model,
             self.dataloader,
             tmpdir=tmpdir,
             gpu_collect=self.gpu_collect,
-            efficient_test=self.efficient_test)
+            efficient_test=self.efficient_test,
+            pre_eval=self.pre_eval)
+        
+        runner.log_buffer.clear()
+
         if runner.rank == 0:
             print('\n')
             runner.log_buffer.output['eval_iter_num'] = len(self.dataloader)

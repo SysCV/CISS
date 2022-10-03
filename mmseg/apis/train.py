@@ -54,7 +54,7 @@ def train_segmentor(model,
             cfg.data.samples_per_gpu,
             cfg.data.workers_per_gpu,
             # cfg.gpus will be ignored if distributed
-            len(cfg.gpu_ids),
+            num_gpus=len(cfg.gpu_ids),
             dist=distributed,
             seed=cfg.seed,
             drop_last=True) for ds in dataset
@@ -112,17 +112,18 @@ def train_segmentor(model,
 
     # register eval hooks
     if validate:
+        eval_cfg = cfg.get('evaluation', {})
         val_dataset = build_dataset(cfg.data.val, dict(test_mode=True))
         val_dataloader = build_dataloader(
             val_dataset,
             samples_per_gpu=1,
             workers_per_gpu=cfg.data.workers_per_gpu,
-            dist=distributed,
+            dist=eval_cfg['distributed_eval'],
             shuffle=False)
-        eval_cfg = cfg.get('evaluation', {})
         eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
-        eval_hook = DistEvalHook if distributed else EvalHook
-        runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
+        print('Distributed eval: ', eval_cfg['distributed_eval'])
+        eval_hook = DistEvalHook if eval_cfg['distributed_eval'] else EvalHook
+        runner.register_hook(eval_hook(val_dataloader, **eval_cfg)) # multi_gpu=(len(cfg.gpu_ids) > 1),
 
     if cfg.resume_from:
         runner.resume(cfg.resume_from)

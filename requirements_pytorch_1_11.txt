@@ -1,0 +1,7 @@
+cityscapesscripts==2.2.0
+humanfriendly==9.2
+jax==0.3.20
+jaxlib==0.3.20
+kornia==0.5.8
+timm==0.6.7
+yapf==0.31.0
