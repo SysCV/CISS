@@ -10,7 +10,7 @@
 #BSUB -R "rusage[mem=8192]"
 #
 # Specify disk limit on local scratch.
-#BSUB -R "rusage[scratch=300000]"
+#BSUB -R "rusage[scratch=40000]"
 #
 # Specify number of required GPUs.
 #BSUB -R "rusage[ngpus_excl_p=1]"

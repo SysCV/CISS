@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Specify time limit.
-#BSUB -W 48:00
+#BSUB -W 120:00
 #
 # Specify number of CPU cores.
 #BSUB -n 8
@@ -10,19 +10,19 @@
 #BSUB -R "rusage[mem=8192]"
 #
 # Specify disk limit on local scratch.
-#BSUB -R "rusage[scratch=300000]"
+#BSUB -R "rusage[scratch=40000]"
 #
 # Specify number of required GPUs.
 #BSUB -R "rusage[ngpus_excl_p=1]"
 #
 # Specify GPU type and number of required GPUs.
-#BSUB -R "select[gpu_model0==TeslaV100_SXM2_32GB]"
+#BSUB -R "select[gpu_mtotal0>=30000]"
 #
 # Specify file for logging standard output.
-#BSUB -o ../logs/exp_62-csHR2acdcHR_fda_diss_src_cestylized_inv_batch2.o
+#BSUB -o ../logs/exp_62-csHR2acdcHR_fda_diss_src_cestylized_inv_batch2-01.o
 #
 # Specify file for logging standard error.
-#BSUB -e error=../logs/exp_62-csHR2acdcHR_fda_diss_src_cestylized_inv_batch2.e
+#BSUB -e error=../logs/exp_62-csHR2acdcHR_fda_diss_src_cestylized_inv_batch2-01.e
 
 /bin/echo Starting on: `date`
 
