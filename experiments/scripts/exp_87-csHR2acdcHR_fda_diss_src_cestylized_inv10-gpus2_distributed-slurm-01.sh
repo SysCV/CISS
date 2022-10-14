@@ -16,10 +16,10 @@
 #SBATCH --gpus=rtx_3090:2
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm-31-01.o
+#SBATCH --output=../logs/exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm-33-01.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm-31-01.e
+#SBATCH --error=../logs/exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm-33-01.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
