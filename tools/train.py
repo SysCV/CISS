@@ -100,6 +100,7 @@ def main(args):
         cfg.gpu_ids = range(n_gpus) if n_gpus is not None else range(1)
 
     # init distributed env first, since logger depends on the dist info.
+    first_run = cfg.get('first_run', False)
     launcher = cfg.get('launcher', None)
     if launcher is not None:
         args.launcher = launcher
@@ -107,7 +108,8 @@ def main(args):
         distributed = False
     else:
         distributed = True
-        init_dist(args.launcher, **cfg.dist_params)
+        if first_run:
+            init_dist(args.launcher, **cfg.dist_params)
 
     # create work_dir
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
