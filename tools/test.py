@@ -96,6 +96,11 @@ def parse_args():
         type=float,
         default=0.5,
         help='Opacity of painted segmentation map. In (0, 1] range.')
+    parser.add_argument(
+        '--data-root',
+        type=str,
+        default=None,
+        help='directory of input set on which testing is performed')
     parser.add_argument('--local_rank', type=int, default=0)
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
@@ -164,6 +169,9 @@ def main():
         for k in cfg.data.test:
             if isinstance(cfg.data.test[k], str):
                 cfg.data.test[k] = cfg.data.test[k].replace('val', 'test')
+    
+    if args.data_root is not None:
+        cfg.data.test['data_root'] = args.data_root
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
@@ -211,7 +219,7 @@ def main():
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
         outputs = single_gpu_test(model, data_loader, args.show, args.show_dir,
-                                  efficient_test, args.opacity)
+                                  efficient_test, False, args.opacity)
     else:
         model = MMDistributedDataParallel(
             model.cuda(),

@@ -160,7 +160,8 @@ class CityscapesDataset(CustomDataset):
                  metric='mIoU',
                  logger=None,
                  imgfile_prefix=None,
-                 efficient_test=False):
+                 efficient_test=False,
+                 write_results=False):
         """Evaluation in Cityscapes/default protocol.
 
         Args:
@@ -186,16 +187,18 @@ class CityscapesDataset(CustomDataset):
         metrics = metric.copy() if isinstance(metric, list) else [metric]
         if 'cityscapes' in metrics:
             eval_results.update(
-                self._evaluate_cityscapes(results, logger, imgfile_prefix))
+                self._evaluate_cityscapes(results, logger, imgfile_prefix, write_results=write_results))
             metrics.remove('cityscapes')
         if len(metrics) > 0:
+            if write_results:
+                self.format_results(results, imgfile_prefix=imgfile_prefix, to_label_id=False)
             eval_results.update(
                 super(CityscapesDataset,
                       self).evaluate(results, metrics, logger, efficient_test))
 
         return eval_results
 
-    def _evaluate_cityscapes(self, results, logger, imgfile_prefix):
+    def _evaluate_cityscapes(self, results, logger, imgfile_prefix, write_results=False):
         """Evaluation in Cityscapes protocol.
 
         Args:
@@ -245,7 +248,7 @@ class CityscapesDataset(CustomDataset):
         eval_results.update(
             CSEval.evaluateImgLists(pred_list, seg_map_list, CSEval.args))
 
-        if tmp_dir is not None:
+        if tmp_dir is not None and not write_results:
             tmp_dir.cleanup()
 
         return eval_results
