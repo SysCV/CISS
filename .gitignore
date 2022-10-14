@@ -123,6 +123,7 @@ configs/tmp_param.json
 configs/generated/
 *.pdf
 *.pgf
+/experiments/torch_distributed_masterports_for_jobs.txt
 
 # Artifacts
 /work_dirs
