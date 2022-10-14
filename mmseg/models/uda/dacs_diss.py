@@ -63,37 +63,50 @@ class DACSDISS(DACS):
         self.stylization['source'] = self.stylization.get('source', {})
         self.stylization['source']['ce_original'] = self.stylization['source'].get('ce_original', False)
         self.stylization['source']['ce_stylized'] = self.stylization['source'].get('ce_stylized', False)
+        self.stylization['source']['average_ce'] = self.stylization['source'].get('average_ce', False)
         self.stylization['source']['inv'] = self.stylization['source'].get('inv', False)
         assert self.stylization['source']['ce_original'] or self.stylization['source']['ce_stylized']
         self.stylization['target'] = cfg['stylize'].get('target', {})
         self.stylization['target']['pseudolabels'] = self.stylization['target'].get('pseudolabels', 'original')
         self.stylization['target']['ce'] = self.stylization['target'].get('ce', [('original', 'original')])
+        self.stylization['target']['average_ce'] = self.stylization['target'].get('average_ce', False)
         self.stylization['target']['inv'] = self.stylization['target'].get('inv', [])
         assert len(self.stylization['target']['ce']) > 0
         self.stylization['inv_loss'] = self.stylization.get('inv_loss', {})
         self.stylization['inv_loss']['norm'] = self.stylization['inv_loss'].get('norm', 'l2')
         self.stylization['inv_loss']['weight'] = self.stylization['inv_loss'].get('weight', 1.0)
+        # Compatibility to initial implementation using only output features of network neck for invariance loss.
+        if isinstance(self.stylization['inv_loss']['weight'], float):
+            self.stylization['inv_loss']['weight'] = [self.stylization['inv_loss']['weight'], 0.0, 0.0, 0.0, 0.0]
 
     def calculate_feature_invariance_loss(self,
                                           feats_input,
                                           feats_ref):
-        if isinstance(feats_input, list):
-            # Multi-scale features from HRDA encoder. Large scale comes first, small scale comes second.
-            losses = []
-            hr_loss_w = self.get_model().decode_head.hr_loss_weight
-            for i in range(2):
+        """Function for calculating feature invariance loss.
+
+        Args:
+            feats_input (list[list[Tensor] or Tensor])
+            feats_ref (list[list[Tensor] or Tensor]): list of the same length as feats_input.
+        """
+        feature_invariance_losses = []
+        for l in range(len(feats_input)):
+            if isinstance(feats_input[l], list):
+                # Multi-scale features from HRDA encoder. Large scale comes first, small scale comes second.
+                losses = []
+                hr_loss_w = self.get_model().decode_head.hr_loss_weight
+                for i in range(2):
+                    if self.stylization['inv_loss']['norm'] == 'l2':
+                        losses.append(torch.nn.functional.mse_loss(feats_input[l][i], feats_ref[l][i], reduction='mean'))
+                    elif self.stylization['inv_loss']['norm'] == 'l1':
+                        losses.append(torch.nn.functional.l1_loss(feats_input[l][i], feats_ref[l][i], reduction='mean'))
+                feature_invariance_losses.append(hr_loss_w * losses[1] + (1.0 - hr_loss_w) * losses[0])
+            else:
+                # Features only from one scale.
                 if self.stylization['inv_loss']['norm'] == 'l2':
-                    losses.append(torch.nn.functional.mse_loss(feats_input[i], feats_ref[i], reduction='mean'))
+                    feature_invariance_losses.append(torch.nn.functional.mse_loss(feats_input[l], feats_ref[l], reduction='mean'))
                 elif self.stylization['inv_loss']['norm'] == 'l1':
-                    losses.append(torch.nn.functional.l1_loss(feats_input[i], feats_ref[i], reduction='mean'))
-            loss = hr_loss_w * losses[1] + (1.0 - hr_loss_w) * losses[0]
-        else:
-            # Features only from one scale.
-            if self.stylization['inv_loss']['norm'] == 'l2':
-                loss = torch.nn.functional.mse_loss(feats_input, feats_ref, reduction='mean')
-            elif self.stylization['inv_loss']['norm'] == 'l1':
-                loss = torch.nn.functional.l1_loss(feats_input, feats_ref, reduction='mean')
-        feature_invariance_loss = self.stylization['inv_loss']['weight'] * loss
+                    feature_invariance_losses.append(torch.nn.functional.l1_loss(feats_input[l], feats_ref[l], reduction='mean'))
+        feature_invariance_loss = sum(weight * loss for loss, weight in zip(feature_invariance_losses, self.stylization['inv_loss']['weight']))
         inv_loss, inv_log = self._parse_losses({'inv_loss': feature_invariance_loss})
         inv_log.pop('loss', None)
         return inv_loss, inv_log
@@ -164,6 +177,9 @@ class DACSDISS(DACS):
                 seg_debug['Source'] = self.get_model().decode_head.debug_output
                 clean_losses = add_prefix(clean_losses, 'src_orig')
                 clean_loss, clean_log_vars = self._parse_losses(clean_losses)
+                if self.stylization['source']['ce_stylized'] and self.stylization['source']['average_ce']:
+                    print('Downweighing source CE orig loss due to averaging.')
+                    clean_loss = 0.5 * clean_loss
                 log_vars.update(clean_log_vars)
                 clean_loss.backward(retain_graph=(self.enable_fdist or self.stylization['source']['inv']))
             if self.print_grad_magnitude:
@@ -184,6 +200,9 @@ class DACSDISS(DACS):
                 seg_debug['Source Stylized'] = self.get_model().decode_head.debug_output
                 clean_stylized_losses = add_prefix(clean_stylized_losses, 'src_stylized')
                 clean_stylized_loss, clean_stylized_log_vars = self._parse_losses(clean_stylized_losses)
+                if self.stylization['source']['ce_original'] and self.stylization['source']['average_ce']:
+                    print('Downweighing source CE stylized loss due to averaging.')
+                    clean_stylized_loss = 0.5 * clean_stylized_loss
                 log_vars.update(clean_stylized_log_vars)
                 clean_stylized_loss.backward(retain_graph=(self.enable_fdist or self.stylization['source']['inv']))
             if self.print_grad_magnitude:
@@ -200,7 +219,7 @@ class DACSDISS(DACS):
         if self.enable_fdist:
             # on original source images
             if self.stylization['source']['ce_original'] or self.stylization['source']['inv']:
-                feat_loss, feat_log = self.calc_feat_dist(img, gt_semantic_seg, src_feat)
+                feat_loss, feat_log = self.calc_feat_dist(img, gt_semantic_seg, src_feat[0])
                 log_vars.update(add_prefix(feat_log, 'src'))
                 feat_loss.backward(retain_graph=(self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']))
                 if self.print_grad_magnitude:
@@ -216,7 +235,7 @@ class DACSDISS(DACS):
                     mmcv.print_log(f'Fdist Grad.: {grad_mag}', 'mmseg')
             # on stylized source images
             if self.stylization['source']['ce_stylized'] or self.stylization['source']['inv']:
-                feat_stylized_loss, feat_stylized_log = self.calc_feat_dist(img_stylized, gt_semantic_seg, src_feat_stylized)
+                feat_stylized_loss, feat_stylized_log = self.calc_feat_dist(img_stylized, gt_semantic_seg, src_feat_stylized[0])
                 log_vars.update(add_prefix(feat_stylized_log, 'src_stylized'))
                 feat_stylized_loss.backward(retain_graph=self.stylization['source']['inv'])
                 if self.print_grad_magnitude:
@@ -341,6 +360,8 @@ class DACSDISS(DACS):
             seg_debug[' '.join(['Mix', style_source, style_target])] = self.get_model().decode_head.debug_output
             mix_losses[j] = add_prefix(mix_losses[j], '_'.join(['mix', style_source, style_target]))
             mix_loss, mix_log_vars = self._parse_losses(mix_losses[j])
+            if self.stylization['target']['average_ce'] and len(self.stylization['target']['ce']) > 1:
+                mix_loss = (1 / len(self.stylization['target']['ce'])) * mix_loss
             log_vars.update(mix_log_vars)
             mix_loss.backward(retain_graph=(len(self.stylization['target']['inv']) > 0))
         for j, t in enumerate(self.stylization['target']['inv']):

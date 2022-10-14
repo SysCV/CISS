@@ -77,7 +77,7 @@ class ASPPWrapper(nn.Module):
         aspp_outs = torch.cat(aspp_outs, dim=1)
 
         output = self.bottleneck(aspp_outs)
-        return output
+        return output, aspp_outs
 
 
 def build_layer(in_channels, out_channels, type, **kwargs):
@@ -151,6 +151,8 @@ class DAFormerHead(BaseDecodeHead):
 
         self.fuse_layer = build_layer(
             sum(embed_dims), self.channels, **fusion_cfg)
+        
+        self.fusion_type = fusion_cfg['type']
 
     def forward(self, inputs):
         x = inputs
@@ -175,7 +177,14 @@ class DAFormerHead(BaseDecodeHead):
                     mode='bilinear',
                     align_corners=self.align_corners)
 
-        x = self.fuse_layer(torch.cat(list(_c.values()), dim=1))
-        x = self.cls_seg(x)
+        x1 = torch.cat(list(_c.values()), dim=1)
+        if self.fusion_type == 'aspp':
+            x3, x2 = self.fuse_layer(x1)
+        else: # fusion_type == 'conv'
+            x3 = self.fuse_layer(x1)
+        x4 = self.cls_seg(x3)
 
-        return x
+        if self.fusion_type == 'aspp':
+            return x4, x1, x2, x3
+        else:
+            return x4, x1, x3

@@ -111,29 +111,38 @@ class HRDAHead(BaseDecodeHead):
                     h_img = y2
                 if w_img < x2:
                     w_img = x2
-            preds = torch.zeros((bs, self.num_classes, h_img, w_img),
-                                device=dev)
             count_mat = torch.zeros((bs, 1, h_img, w_img), device=dev)
 
-            crop_seg_logits = self.head(features)
+            crop_seg_logits, crop_mlp_outs, crop_bottleneck_inputs, crop_bottleneck_outs = self.head(features)
+
+            preds = torch.zeros((bs, self.num_classes, h_img, w_img), device=dev)
+            mlp_outs = torch.zeros((bs, crop_mlp_outs.shape[1], h_img, w_img), device=dev)
+            bottleneck_inputs = torch.zeros((bs, crop_bottleneck_inputs.shape[1], h_img, w_img), device=dev)
+            bottleneck_outs = torch.zeros((bs, crop_bottleneck_outs.shape[1], h_img, w_img), device=dev)
+
             for i in range(len(boxes)):
                 y1, y2, x1, x2 = boxes[i]
-                crop_seg_logit = crop_seg_logits[i * bs:(i + 1) * bs]
-                preds += F.pad(crop_seg_logit,
-                               (int(x1), int(preds.shape[3] - x2), int(y1),
-                                int(preds.shape[2] - y2)))
-
+                crop_seg_logit, crop_mlp_out, crop_bottleneck_input, crop_bottleneck_out =\
+                    [x[i * bs:(i + 1) * bs] for x in [crop_seg_logits, crop_mlp_outs, crop_bottleneck_inputs, crop_bottleneck_outs]]
+                preds, mlp_outs, bottleneck_inputs, bottleneck_outs =\
+                    [x + F.pad(y, (int(x1), int(x.shape[3] - x2), int(y1), int(x.shape[2] - y2)))
+                        for (x, y) in zip(
+                            [preds, mlp_outs, bottleneck_inputs, bottleneck_outs],
+                            [crop_seg_logit, crop_mlp_out, crop_bottleneck_input, crop_bottleneck_out]
+                        )
+                    ]
                 count_mat[:, :, y1:y2, x1:x2] += 1
 
             assert (count_mat == 0).sum() == 0
-            preds = preds / count_mat
-            return preds
+            preds, mlp_outs, bottleneck_inputs, bottleneck_outs = [x / count_mat for x in [preds, mlp_outs, bottleneck_inputs, bottleneck_outs]]
+            return preds, mlp_outs, bottleneck_inputs, bottleneck_outs
         else:
             return self.head(inp)
 
     def get_scale_attention(self, inp):
         if self.scale_attention is not None:
-            att = torch.sigmoid(self.scale_attention(inp))
+            att_logits, _, _ = self.scale_attention(inp)
+            att = torch.sigmoid(att_logits)
         else:
             att = self.fixed_attention
         return att
@@ -157,11 +166,11 @@ class HRDAHead(BaseDecodeHead):
             crop_y1, crop_y2, crop_x1, crop_x2 = self.hr_crop_box
 
         # print_log(f'lr_inp {[f.shape for f in lr_inp]}', 'mmseg')
-        lr_seg = self.head(lr_inp)
+        lr_seg, lr_mlp_out, lr_bottleneck_input, lr_bottleneck_out = self.head(lr_inp)
         # print('LR seg shape:', lr_seg.shape)
         # print_log(f'lr_seg {lr_seg.shape}', 'mmseg')
 
-        hr_seg = self.decode_hr(hr_inp, batch_size)
+        hr_seg, hr_mlp_out, hr_bottleneck_input, hr_bottleneck_out = self.decode_hr(hr_inp, batch_size)
         # print('HR seg shape:', hr_seg.shape)
 
         has_crop = has_crop and hr_seg.shape[2] == lr_seg.shape[2]
@@ -213,7 +222,7 @@ class HRDAHead(BaseDecodeHead):
                     att * torch.softmax(fused_seg, dim=1), dim=1,
                     keepdim=True).detach().cpu().numpy()
 
-        return fused_seg, lr_seg, hr_seg
+        return fused_seg, lr_seg, hr_seg, lr_mlp_out, hr_mlp_out, lr_bottleneck_input, hr_bottleneck_input, lr_bottleneck_out, hr_bottleneck_out
 
     def reset_crop(self):
         del self.hr_crop_box
@@ -228,10 +237,12 @@ class HRDAHead(BaseDecodeHead):
         """Forward function for training."""
         if self.enable_hr_crop:
             assert self.hr_crop_box is not None
-        seg_logits = self.forward(inputs)
+        outputs = self.forward(inputs)
+        seg_logits = (outputs[0], outputs[1], outputs[2])
+        decoder_mres_feats = [[outputs[3], outputs[4]], [outputs[5], outputs[6]], [outputs[7], outputs[8]], [outputs[1], outputs[2]]]
         losses = self.losses(seg_logits, gt_semantic_seg, seg_weight)
         self.reset_crop()
-        return losses
+        return losses, decoder_mres_feats
 
     def forward_test(self, inputs, img_metas, test_cfg):
         """Forward function for testing, only ``fused_seg`` is used."""

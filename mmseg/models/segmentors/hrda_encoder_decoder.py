@@ -236,17 +236,21 @@ class HRDAEncoderDecoder(EncoderDecoder):
             if return_feat and self.feature_scale in \
                     self.feature_scale_all_strs:
                 if 'features' not in losses:
-                    losses['features'] = []
-                losses['features'].append(mres_feats[i])
+                    losses['features'] = [[]]
+                losses['features'][0].append(mres_feats[i])
             if return_feat and s == self.feature_scale:
-                losses['features'] = mres_feats[i]
+                losses['features'] = [mres_feats[i]]
                 break
 
+        if return_seg_loss or return_feat:
+            loss_decode, decoder_feats = self._decode_head_forward_train(mres_feats,
+                                                                         img_metas,
+                                                                         gt_semantic_seg,
+                                                                         seg_weight)
         if return_seg_loss:
-            loss_decode = self._decode_head_forward_train(mres_feats, img_metas,
-                                                        gt_semantic_seg,
-                                                        seg_weight)
             losses.update(loss_decode)
+        if return_feat:
+            losses['features'].extend(decoder_feats)
 
         if self.decode_head.debug and prob_vis is not None:
             self.decode_head.debug_output['Crop Prob.'] = prob_vis
