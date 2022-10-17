@@ -128,6 +128,7 @@ if __name__ == '__main__':
                     continue
                 else:
                     cfg['first_run'] = True
+                    cfg['resume_from'] = args.resume_from
             if 'LSB_JOBINDEX' in os.environ:
                 # LSF only allows one-based task IDs.
                 if (i + 1) != int(os.environ['LSB_JOBINDEX']):
@@ -135,6 +136,7 @@ if __name__ == '__main__':
                     continue
                 else:
                     cfg['first_run'] = True
+                    cfg['resume_from'] = args.resume_from
             if args.local_rank == 0:
                 cfg['name'] = f'{datetime.now().strftime("%y%m%d_%H%M")}_' \
                             f'{cfg["name"]}_{str(uuid.uuid4())[:5]}'
