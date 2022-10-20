@@ -78,15 +78,58 @@ class DACSDISS(DACS):
         # Compatibility to initial implementation using only output features of network neck for invariance loss.
         if isinstance(self.stylization['inv_loss']['weight'], float):
             self.stylization['inv_loss']['weight'] = [self.stylization['inv_loss']['weight'], 0.0, 0.0, 0.0, 0.0]
+        self.stylization['inv_loss']['class_average'] = self.stylization['inv_loss'].get('class_average', False)
+
+    def calculate_feature_invariance_loss_class_averaged(self,
+                                                         feats_input,
+                                                         feats_ref,
+                                                         gt,
+                                                         i=0):
+
+        # Compute per-pixel per-sample feature differences.
+        feat_diff = feats_input - feats_ref
+        if self.stylization['inv_loss']['norm'] == 'l2':
+            feat_diff = torch.square(feat_diff)
+        elif self.stylization['inv_loss']['norm'] == 'l1':
+            feat_diff = torch.abs(feat_diff)
+        feat_diff = torch.mean(feat_diff, 1, keepdim=True)
+
+        # Rescale ground truth to the resolution of the features.
+        gt_rescaled = gt.clone()
+        if i in HRDAEncoderDecoder.last_train_crop_box:
+            gt_rescaled = crop(
+                gt_rescaled,
+                HRDAEncoderDecoder.last_train_crop_box[i])
+        scale_factor = gt_rescaled.shape[-1] // feats_input.shape[-1]
+        gt_rescaled = downscale_label_ratio(
+            gt_rescaled, scale_factor, self.fdist_scale_min_ratio,
+            self.num_classes, 255).long().detach()
+
+        # Find classes that occur in the batch.
+        classes_in_batch, classes_indices, classes_counts = torch.unique(gt_rescaled,
+                                                                         sorted=True,
+                                                                         return_inverse=True,
+                                                                         return_counts=True)
+
+        # Compute feature invariance loss as an average of per-class average feature differences.
+        losses_class = []
+        for j, c in enumerate(classes_in_batch):
+            # Ignore-index.
+            if c == 255:
+                continue
+            losses_class.append(torch.sum(feat_diff[gt_rescaled == c]) / classes_counts[j])
+        return sum(losses_class) / len(losses_class)
 
     def calculate_feature_invariance_loss(self,
                                           feats_input,
-                                          feats_ref):
+                                          feats_ref,
+                                          gt=None):
         """Function for calculating feature invariance loss.
 
         Args:
             feats_input (list[list[Tensor] or Tensor])
             feats_ref (list[list[Tensor] or Tensor]): list of the same length as feats_input.
+            gt (Tensor): ground-truth annotations for pairs of images on which feature invariance loss is calculated.
         """
         feature_invariance_losses = []
         for l in range(len(feats_input)):
@@ -95,17 +138,23 @@ class DACSDISS(DACS):
                 losses = []
                 hr_loss_w = self.get_model().decode_head.hr_loss_weight
                 for i in range(2):
-                    if self.stylization['inv_loss']['norm'] == 'l2':
-                        losses.append(torch.nn.functional.mse_loss(feats_input[l][i], feats_ref[l][i], reduction='mean'))
-                    elif self.stylization['inv_loss']['norm'] == 'l1':
-                        losses.append(torch.nn.functional.l1_loss(feats_input[l][i], feats_ref[l][i], reduction='mean'))
+                    if not self.stylization['inv_loss']['class_average'] or gt is None:
+                        if self.stylization['inv_loss']['norm'] == 'l2':
+                            losses.append(torch.nn.functional.mse_loss(feats_input[l][i], feats_ref[l][i], reduction='mean'))
+                        elif self.stylization['inv_loss']['norm'] == 'l1':
+                            losses.append(torch.nn.functional.l1_loss(feats_input[l][i], feats_ref[l][i], reduction='mean'))
+                    else:
+                        losses.append(self.calculate_feature_invariance_loss_class_averaged(feats_input[l][i], feats_ref[l][i], gt, i))
                 feature_invariance_losses.append(hr_loss_w * losses[1] + (1.0 - hr_loss_w) * losses[0])
             else:
                 # Features only from one scale.
-                if self.stylization['inv_loss']['norm'] == 'l2':
-                    feature_invariance_losses.append(torch.nn.functional.mse_loss(feats_input[l], feats_ref[l], reduction='mean'))
-                elif self.stylization['inv_loss']['norm'] == 'l1':
-                    feature_invariance_losses.append(torch.nn.functional.l1_loss(feats_input[l], feats_ref[l], reduction='mean'))
+                if not self.stylization['inv_loss']['class_average'] or gt is None:
+                    if self.stylization['inv_loss']['norm'] == 'l2':
+                        feature_invariance_losses.append(torch.nn.functional.mse_loss(feats_input[l], feats_ref[l], reduction='mean'))
+                    elif self.stylization['inv_loss']['norm'] == 'l1':
+                        feature_invariance_losses.append(torch.nn.functional.l1_loss(feats_input[l], feats_ref[l], reduction='mean'))
+                else:
+                    feature_invariance_losses.append(self.calculate_feature_invariance_loss_class_averaged(feats_input[l], feats_ref[l], gt))
         feature_invariance_loss = sum(weight * loss for loss, weight in zip(feature_invariance_losses, self.stylization['inv_loss']['weight']))
         inv_loss, inv_log = self._parse_losses({'inv_loss': feature_invariance_loss})
         inv_log.pop('loss', None)
