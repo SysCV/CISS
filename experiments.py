@@ -1739,6 +1739,83 @@ def generate_experiment_cfgs(id):
                     gpu_model = 'NVIDIATITANRTX'
                     cfg = config_from_vars()
                     cfgs.append(cfg)
+    # -------------------------------------------------------------------------
+    # HRDA Reproduction on Cityscapes -> Dark Zurich.
+    # -------------------------------------------------------------------------
+    elif id == 99:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        # Use plcrop=False as ACDC has no rectification
+        # artifacts in contrast to Cityscapes.
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings', 0.01, False
+        inference = 'slide'
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # ---------------------------------------------------
+    # FDA baseline for DISS on Cityscapes -> Dark Zurich.
+    # ---------------------------------------------------
+    elif id == 100:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 101:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                1.0,
+                2.0,
+                5.0,
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+                500.0,
+                1000.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
     else:
         raise NotImplementedError('Unknown id {}'.format(id))
 
