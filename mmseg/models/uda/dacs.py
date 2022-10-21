@@ -309,7 +309,7 @@ class DACS(UDADecorator):
         # ImageNet feature distance
         if self.enable_fdist:
             feat_loss, feat_log = self.calc_feat_dist(img, gt_semantic_seg,
-                                                      src_feat)
+                                                      src_feat[0])
             log_vars.update(add_prefix(feat_log, 'src'))
             feat_loss.backward()
             if self.print_grad_magnitude:
