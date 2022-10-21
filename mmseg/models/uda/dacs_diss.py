@@ -301,7 +301,7 @@ class DACSDISS(DACS):
         
         # 4) Feature invariance loss between original and stylized versions of source images.
         if self.stylization['source']['inv']:
-            inv_src_loss, inv_src_log = self.calculate_feature_invariance_loss(src_feat, src_feat_stylized)
+            inv_src_loss, inv_src_log = self.calculate_feature_invariance_loss(src_feat, src_feat_stylized, gt=gt_semantic_seg)
             log_vars.update(add_prefix(inv_src_log, 'src'))
             inv_src_loss.backward()
 
@@ -446,7 +446,7 @@ class DACSDISS(DACS):
                                                                    return_feat=True,
                                                                    return_seg_loss=False)
                     feats_cached[j][i] = mix_losses.pop('features')
-            mix_inv_loss, mix_inv_logs[j] = self.calculate_feature_invariance_loss(feats_cached[j][0], feats_cached[j][1])
+            mix_inv_loss, mix_inv_logs[j] = self.calculate_feature_invariance_loss(feats_cached[j][0], feats_cached[j][1], gt=pseudo_label.unsqueeze(1))
             log_vars.update(add_prefix(mix_inv_logs[j], '_'.join(['mix', ''.join(t[0][:]), ''.join(t[1][:])])))
             mix_inv_loss.backward(retain_graph=(j < len(self.stylization['target']['inv']) - 1))
         del gt_pixel_weight, pseudo_weight
