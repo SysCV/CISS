@@ -1194,3 +1194,155 @@ class FDA(object):
         repr_str = self.__class__.__name__
         repr_str += f'(bandwidth={self.bandwidth})'
         return repr_str
+
+@PIPELINES.register_module()
+class ReinhardTransfer(object):
+    """Perform color transfer with the source and target images based on Reinhard's algorithm.
+    E. Reinhard, M. Adhikhmin, B. Gooch, P. Shirley, "Color transfer
+       between images," in IEEE Computer Graphics and Applications, vol.21,
+       no.5, pp.34-41, 2001.
+
+    Added key is src.img_stylized for (src, _) in keys.
+
+    """
+
+    def __init__(self, keys=None):
+        self.keys = keys
+        # Define conversion matrices.
+        self.rgb2lms = np.array([[0.3811, 0.5783, 0.0402],
+                            [0.1967, 0.7244, 0.0782],
+                            [0.0241, 0.1288, 0.8444]])
+
+        self.lms2lab = np.dot(
+            np.array([[1 / (3**0.5), 0, 0],
+                    [0, 1 / (6**0.5), 0],
+                    [0, 0, 1 / (2**0.5)]]),
+            np.array([[1, 1, 1],
+                    [1, 1, -2],
+                    [1, -1, 0]])
+        )
+        self.lms2rgb = np.linalg.inv(self.rgb2lms)
+        self.lab2lms = np.linalg.inv(self.lms2lab)
+        self.timer = Timer()
+
+    def rgb_to_lab(self, im_rgb):
+        """Transforms an image from RGB to LAB color space
+        Parameters
+        ----------
+        im_rgb : array_like
+            An RGB image
+        Returns
+        -------
+        im_lab : array_like
+            LAB representation of the input image `im_rgb`.
+        References
+        ----------
+        D. Ruderman, T. Cronin, and C. Chiao, "Statistics of cone
+        responses to natural images: implications for visual coding,"
+        J. Opt. Soc. Am. A vol.15, pp.2036-2045, 1998.
+        """
+
+        # get input image dimensions
+        m = im_rgb.shape[0]
+        n = im_rgb.shape[1]
+
+        # calculate im_lms values from RGB
+        im_rgb = np.reshape(im_rgb, (m * n, 3))
+        im_lms = np.dot(self.rgb2lms, np.transpose(im_rgb))
+        im_lms[im_lms == 0] = np.spacing(1)
+
+        # calculate LAB values from im_lms
+        im_lab = np.dot(self.lms2lab, np.log(im_lms))
+
+        # reshape to 3-channel image
+        im_lab = np.reshape(im_lab.transpose(), (m, n, 3))
+
+        return im_lab    
+    
+    def lab_to_rgb(self, im_lab):
+        """Transforms an image from LAB to RGB color space
+        Parameters
+        ----------
+        im_lab : array_like
+            An image in LAB color space
+        Returns
+        -------
+        im_rgb : array_like
+            The RGB representation of the input image 'im_lab'.
+        References
+        ----------
+        D. Ruderman, T. Cronin, and C. Chiao, "Statistics of cone
+        responses to natural images: implications for visual coding,"
+        J. Opt. Soc. Am. A 15, 2036-2045 (1998).
+        """
+
+        # get input image dimensions
+        m = im_lab.shape[0]
+        n = im_lab.shape[1]
+
+        # calculate im_lms values from LAB
+        im_lab = np.reshape(im_lab, (m * n, 3))
+        im_lms = np.dot(self.lab2lms, np.transpose(im_lab))
+
+        # calculate RGB values from im_lms
+        im_lms = np.exp(im_lms)
+        im_lms[im_lms == np.spacing(1)] = 0
+
+        im_rgb = np.dot(self.lms2rgb, im_lms)
+
+        # reshape to 3-channel image
+        im_rgb = np.reshape(im_rgb.transpose(), (m, n, 3))
+
+        return im_rgb
+            
+    def reinhard_source_to_target_np(self, src_img, trg_img):
+
+        print(src_img.shape)
+        print(trg_img.shape)
+
+        # Convert source and target images to Ruderman's LAB color space.
+        src_img_lab = self.rgb_to_lab(src_img)
+        trg_img_lab = self.rgb_to_lab(trg_img)
+        
+        # Computer means and standard deviations per channel for LAB images.
+        src_mu = np.mean(src_img_lab, axis=(-3, -2))
+        src_sigma = np.std(src_img_lab, axis=(-3, -2))
+        trg_mu = np.mean(trg_img_lab, axis=(-3, -2))
+        trg_sigma = np.std(trg_img_lab, axis=(-3, -2))
+
+        # Map the source LAB image to zero mean and unit variance and assign it the mean and variance of the target image.
+        src_in_trg_lab = (src_img_lab - src_mu) * (trg_sigma / src_sigma) + trg_mu
+
+        # Convert stylized source image back to RGB color space.
+        src_in_trg = self.lab_to_rgb(src_in_trg_lab)
+        
+        # Clamp output RGB image to [0, 255].
+        src_in_trg[src_in_trg < 0] = 0
+        src_in_trg[src_in_trg > 255] = 255
+
+        return src_in_trg
+
+    def __call__(self, results):
+        """Call function to perform Reinhard color transfer.
+
+        Args:
+            results (dict): Result dict from loading pipeline.
+
+        Returns:
+            dict: Normalized results, 'img_norm_cfg' key is added into
+                result dict.
+        """
+
+        print('Time since last check: {:6.3f} sec.'.format(self.timer.since_last_check()))
+        if self.keys is not None:
+            for k in self.keys:
+                src, trg = k
+                results[src]['img_stylized'] = self.reinhard_source_to_target_np(
+                    results[src]['img'],
+                    results[trg]['img'])
+        print('Time spent on Reinhard: {:6.3f} sec.'.format(self.timer.since_last_check()))
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        return repr_str

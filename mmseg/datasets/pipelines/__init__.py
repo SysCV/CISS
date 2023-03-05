@@ -6,12 +6,12 @@ from .test_time_aug import MultiScaleFlipAug
 from .transforms import (CLAHE, AdjustGamma, Normalize, Pad,
                          PhotoMetricDistortion, RandomCrop, CentralCrop, RandomFlip,
                          RandomRotate, Rerange, Resize, RGB2Gray, SegRescale,
-                         FDA)
+                         FDA, ReinhardTransfer)
 
 __all__ = [
     'Compose', 'to_tensor', 'ToTensor', 'ImageToTensor', 'ToDataContainer',
     'Transpose', 'Collect', 'LoadAnnotations', 'LoadImageFromFile',
     'MultiScaleFlipAug', 'Resize', 'RandomFlip', 'Pad', 'RandomCrop', 'CentralCrop',
     'Normalize', 'SegRescale', 'PhotoMetricDistortion', 'RandomRotate',
-    'AdjustGamma', 'CLAHE', 'Rerange', 'RGB2Gray', 'FDA'
+    'AdjustGamma', 'CLAHE', 'Rerange', 'RGB2Gray', 'FDA', 'ReinhardTransfer'
 ]
