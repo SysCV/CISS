@@ -261,9 +261,12 @@ def generate_experiment_cfgs(id):
         # are only masked out if the training crop is at the periphery of the
         # image.
         if 'dacs' in uda and plcrop == 'v2':
-            cfg['data']['train'].setdefault('target', {})
-            cfg['data']['train']['target']['crop_pseudo_margins'] = \
-                [30, 240, 30, 30]
+            if stylization is not None:
+                cfg['data']['train']['crop_pseudo_margins_target'] = [30, 240, 30, 30]
+            else:
+                cfg['data']['train'].setdefault('target', {})
+                cfg['data']['train']['target']['crop_pseudo_margins'] = \
+                    [30, 240, 30, 30]
         if 'dacs' in uda and rcs_T is not None:
             cfg = setup_rcs(cfg, rcs_T, rcs_min_crop)
         if 'dacs' in uda and sync_crop_size_mod is not None:
@@ -275,6 +278,12 @@ def generate_experiment_cfgs(id):
         if inv_loss_weight is not None:
             cfg.setdefault('uda', {}).setdefault('stylize', {}).setdefault('inv_loss', {})
             cfg['uda']['stylize']['inv_loss']['weight'] = inv_loss_weight
+        if inv_loss_weight_target is not None:
+            cfg.setdefault('uda', {}).setdefault('stylize', {}).setdefault('inv_loss', {})
+            cfg['uda']['stylize']['inv_loss']['weight_target'] = inv_loss_weight_target
+        if inv_loss_norm is not None:
+            cfg.setdefault('uda', {}).setdefault('stylize', {}).setdefault('inv_loss', {})
+            cfg['uda']['stylize']['inv_loss']['norm'] = inv_loss_norm
 
         # Setup data root directories.
         if os.environ.get('DIR_SOURCE_DATASET') is not None:
@@ -382,6 +391,8 @@ def generate_experiment_cfgs(id):
     architecture = None
     diss_config = None
     inv_loss_weight = None
+    inv_loss_weight_target = None
+    inv_loss_norm = None
     workers_per_gpu = 1
     rcs_T = None
     rcs_min_crop = 0.5
@@ -1816,7 +1827,1160 @@ def generate_experiment_cfgs(id):
                     gpu_model = 'NVIDIATITANRTX'
                     cfg = config_from_vars()
                     cfgs.append(cfg)
-    else:
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 102:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                2.0,
+                5.0,
+                20.0,
+                50.0,
+                200.0,
+                500.0,
+                1000.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 103:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_invclassavg', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                1.0,
+                2.0,
+                5.0,
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+                500.0,
+                1000.0,
+           ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ------------------------------------------------------------
+    # DISS ablation study on invariance loss weights with L1 loss.
+    # ------------------------------------------------------------
+    elif id == 104:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inv_loss_norm = 'l1'
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                100.0,
+                10.0,
+                1.0,
+                0.1,
+           ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 105:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                100.0,
+                50.0,
+                20.0,
+                10.0,
+           ]:
+                for inv_loss_weight_target in [
+                    100.0,
+                    50.0,
+                    20.0,
+                    10.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 106:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                1.0,
+                10.0,
+                100.0,
+                1000.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ------------------------------------------------------------
+    # DISS ablation study on invariance loss weights with L1 loss.
+    # ------------------------------------------------------------
+    elif id == 107:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        inv_loss_norm = 'l1'
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                0.1,
+                0.2,
+                0.5,
+                1.0,
+                2.0,
+                5.0,
+                10.0,
+           ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ------------------------------------------------------------
+    # DISS ablation study on invariance loss weights with L1 loss.
+    # ------------------------------------------------------------
+    elif id == 108:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inv_loss_norm = 'l1'
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                0.1,
+                0.2,
+                0.5,
+                1.0,
+                2.0,
+                5.0,
+                10.0,
+           ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ----------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights on Cityscapes -> Dark Zurich.
+    # ----------------------------------------------------------------------------
+    elif id == 109:
+        seeds = [1]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                5.0,
+                20.0,
+                50.0,
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    5.0,
+                    20.0,
+                    50.0,
+                    200.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 110:
+        seeds = [1]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                5.0,
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+           ]:
+                for inv_loss_weight_target in [
+                    5.0,
+                    10.0,
+                    20.0,
+                    50.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # ----------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights on Cityscapes -> Dark Zurich.
+    # ----------------------------------------------------------------------------
+    elif id == 111:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for (inv_loss_weight, inv_loss_weight_target) in [
+                (20.0, 0.0),
+                (50.0, 0.0),
+                (200.0, 0.0),
+                (500.0, 0.0),
+                (0.0, 20.0),
+                (20.0, 20.0),
+                (50.0, 20.0),
+                (100.0, 20.0),
+                (200.0, 20.0),
+                (500.0, 20.0),
+                (0.0, 50.0),
+                (20.0, 50.0),
+                (50.0, 50.0),
+                (100.0, 50.0),
+                (200.0, 50.0),
+                (500.0, 50.0),
+                (0.0, 100.0),
+                (20.0, 100.0),
+                (50.0, 100.0),
+                (100.0, 100.0),
+                (200.0, 100.0),
+                (500.0, 100.0),
+                (0.0, 200.0),
+                (20.0, 200.0),
+                (50.0, 200.0),
+                (100.0, 200.0),
+                (200.0, 200.0),
+                (500.0, 200.0),
+                (0.0, 500.0),
+                (20.0, 500.0),
+                (50.0, 500.0),
+                (100.0, 500.0),
+                (200.0, 500.0),
+                (500.0, 500.0),
+           ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 112:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                1.0,
+                2.0,
+                5.0,
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+                500.0,
+                1000.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on target domain: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 113:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                50.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ---------------------------------------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # ---------------------------------------------------------------------------------------------------------------------------------------------
+    elif id == 114:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 115:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    10.0,
+                    20.0,
+                    50.0,
+                    100.0,
+                    200.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+
+    # -------------------------------------------------------------------------
+    # HRDA reproduction on GTA5 -> Cityscapes.
+    # -------------------------------------------------------------------------
+    if id == 116:
+        seeds = [1]
+        #         source,      target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings', 0.01, 'v2'
+        inference = 'slide'
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    # DISS GTA5 -> Cityscapes ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    elif id == 117:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, 'v2'
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                2.0,
+                5.0,
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ------------------------------------------------
+    # DISS ablation study on CE loss in target domain.
+    # ------------------------------------------------
+    elif id == 118:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    100.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    # DISS GTA5 -> Cityscapes ablation study on invariance loss weights in target domain:  CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # -------------------------------------------------------------------------------------------------------------------------------------------------------------
+    elif id == 119:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                2.0,
+                5.0,
+                10.0,
+                20.0,
+                50.0,
+                100.0,
+                200.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 120:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        inference = 'slide'
+        # n_gpus = 2
+        # launcher = 'pytorch'
+        # distributed_eval = True
+        # pre_eval = True
+        # batch_size = 1
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                2.0,
+                10.0,
+                50.0,
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    2.0,
+                    10.0,
+                    50.0,
+                    200.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+
+    # -------------------------------------------------------------------------
+    # HRDA reproduction on GTA5 -> Cityscapes.
+    # -------------------------------------------------------------------------
+    elif id == 121:
+        seeds = [1]
+        #         source,      target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings', 0.01, 'v2'
+        inference = 'slide'
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # -------------------------------------------------------------------------
+    # HRDA reproduction on GTA5 -> Cityscapes.
+    # -------------------------------------------------------------------------
+    elif id == 122:
+        seeds = [2]
+        #         source,      target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings', 0.01, 'v2'
+        inference = 'slide'
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 123:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                2.0,
+                10.0,
+                50.0,
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    2.0,
+                    10.0,
+                    50.0,
+                    200.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # -----------------------------------------------------------------------------------------------------------------------
+    # DISS Reinhard ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # -----------------------------------------------------------------------------------------------------------------------
+    elif id == 124:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'reinhard'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                0.5,
+                2.0,
+                10.0,
+                50.0,
+                200.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------------------------------------------
+    # DISS Reinhard ablation study on invariance loss weights in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------------------------------------------
+    elif id == 125:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'reinhard'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                0.5,
+                2.0,
+                10.0,
+                50.0,
+                200.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------
+    # DISS Reinhard ablation study on invariance loss weights.
+    # --------------------------------------------------------
+    elif id == 126:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'reinhard'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        n_gpus = 2
+        launcher = 'pytorch'
+        distributed_eval = True
+        pre_eval = True
+        batch_size = 1
+        workers_per_gpu = 8
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                0.5,
+                2.0,
+                10.0,
+                50.0,
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    0.5,
+                    2.0,
+                    10.0,
+                    50.0,
+                    200.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 127:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        # n_gpus = 2
+        # launcher = 'pytorch'
+        # distributed_eval = True
+        # pre_eval = True
+        # batch_size = 1
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                for (inv_loss_weight, inv_loss_weight_target) in [
+                    (10.0, 10.0),
+                    (100.0, 100.0),
+                ]:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------
+    # DISS Reinhard ablation study on invariance loss weights.
+    # --------------------------------------------------------
+    elif id == 128:
+        seeds = [0]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'reinhard'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        # n_gpus = 2
+        # launcher = 'pytorch'
+        # distributed_eval = True
+        # pre_eval = True
+        # batch_size = 1
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                0.5,
+                2.0,
+                10.0,
+                50.0,
+                200.0,
+           ]:
+                for inv_loss_weight_target in [
+                    0.5,
+                    2.0,
+                    10.0,
+                    50.0,
+                    200.0,
+                ]:
+                    for seed in seeds:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 129:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                for inv_loss_weight in [
+                    1.0,
+                    2.0,
+                    5.0,
+                    10.0,
+                    20.0,
+                    50.0,
+                    100.0,
+                    200.0,
+                    500.0,
+                    1000.0,
+                ]:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------------
+    elif id == 130:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                for inv_loss_weight in [
+                    1.0,
+                    2.0,
+                    5.0,
+                    10.0,
+                    20.0,
+                    50.0,
+                    100.0,
+                    200.0,
+                    500.0,
+                    1000.0,
+                ]:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ------------------------------------------------------------------
+    # DISS GTA5 -> Cityscapes ablation study on invariance loss weights.
+    # ------------------------------------------------------------------
+    elif id == 131:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (gta2cs, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                for inv_loss_weight in [
+                    1.0,
+                    2.0,
+                    5.0,
+                    10.0,
+                ]:
+                    for inv_loss_weight_target in [
+                        1.0,
+                        2.0,
+                        5.0,
+                        10.0,
+                    ]:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # -----------------------------------------------
+    # DISS ablation study on invariance loss weights.
+    # -----------------------------------------------
+    elif id == 132:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                for inv_loss_weight in [
+                    50.0,
+                    100.0,
+                    200.0,
+                    500.0,
+                ]:
+                    for inv_loss_weight_target in [
+                        1.0,
+                        5.0,
+                        20.0,
+                        100.0,
+                    ]:
+                        source, target, crop, rcs_min_crop = dataset
+                        gpu_model = 'NVIDIATITANRTX'
+                        cfg = config_from_vars()
+                        cfgs.append(cfg)
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    # DISS ablation study on target domain with CE orig + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    elif id == 133:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                for inv_loss_weight in [
+                    200.0,
+                ]:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ----------------------------------------------------------------------------------------
+    # DISS ablation study on source domain - Part 2: CE orig -> Y, CE stylized -> Y, Inv -> N.
+    # ----------------------------------------------------------------------------------------
+    elif id == 134:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for seed in seeds:
+                source, target, crop, rcs_min_crop = dataset
+                gpu_model = 'NVIDIATITANRTX'
+                cfg = config_from_vars()
+                cfgs.append(cfg)
+    # --------------------------------------------------------------
+    # DISS Cityscapes -> Dark Zurich, lambda_s = 100, lambda_t = 50.
+    # --------------------------------------------------------------
+    elif id == 135:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for (inv_loss_weight, inv_loss_weight_target) in [
+                (100.0, 50.0),
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # --------------------------------------------------------------------------------------------------------
+    # DISS Reinhard in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # --------------------------------------------------------------------------------------------------------
+    elif id == 136:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'reinhard'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                2.0,
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
+    # ---------------------------------------------------------
+    # DISS ablation study on invariance point in source domain.
+    # ---------------------------------------------------------
+    elif id == 137:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for inv_loss_weight in [
+                [0.0, 0.0, 0.0, 0.0, 0.001],
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)    else:
         raise NotImplementedError('Unknown id {}'.format(id))
 
     return cfgs
