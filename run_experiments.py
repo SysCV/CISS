@@ -118,7 +118,7 @@ if __name__ == '__main__':
             # cfg['evaluation'] = dict(interval=2, metric='mIoU', distributed_eval=True, pre_eval=True)
             # cfg.setdefault('log_config', {})['interval'] = 1
             # cfg['checkpoint_config'] = dict(by_epoch=False, interval=1, max_keep_ckpts=1)
-            if 'SLURM_ARRAY_TASK_ID' not in os.environ and 'LSB_JOBINDEX' not in os.environ and i == args.seed_to_resume_from:
+            if 'SLURM_ARRAY_TASK_ID' not in os.environ and ('LSB_JOBINDEX' not in os.environ or int(os.environ['LSB_JOBINDEX']) == 0) and i == args.seed_to_resume_from:
                 cfg['resume_from'] = args.resume_from
                 cfg['first_run'] = True
             # In case of job array, only run the configuration with number that corresponds to the task ID.
@@ -129,7 +129,7 @@ if __name__ == '__main__':
                 else:
                     cfg['first_run'] = True
                     cfg['resume_from'] = args.resume_from
-            if 'LSB_JOBINDEX' in os.environ:
+            if 'LSB_JOBINDEX' in os.environ and int(os.environ['LSB_JOBINDEX']) >= 1:
                 # LSF only allows one-based task IDs.
                 if (i + 1) != int(os.environ['LSB_JOBINDEX']):
                     config_files.append([])
@@ -173,13 +173,13 @@ if __name__ == '__main__':
         for i, cfg in enumerate(cfgs):
             if args.startup_test and cfg['seed'] != 0:
                 continue
-            if 'SLURM_ARRAY_TASK_ID' not in os.environ and 'LSB_JOBINDEX' not in os.environ and i < args.seed_to_resume_from:
+            if 'SLURM_ARRAY_TASK_ID' not in os.environ and ('LSB_JOBINDEX' not in os.environ or int(os.environ['LSB_JOBINDEX']) == 0) and i < args.seed_to_resume_from:
                 continue
             # In case of job array, only run the configuration with number that corresponds to the task ID.
             if 'SLURM_ARRAY_TASK_ID' in os.environ:
                 if i != int(os.environ['SLURM_ARRAY_TASK_ID']):
                     continue
-            if 'LSB_JOBINDEX' in os.environ:
+            if 'LSB_JOBINDEX' in os.environ and int(os.environ['LSB_JOBINDEX']) >= 1:
                 # LSF only allows one-based task IDs.
                 if (i + 1) != int(os.environ['LSB_JOBINDEX']):
                     continue
