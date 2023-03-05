@@ -71,13 +71,18 @@ class DACSDISS(DACS):
         self.stylization['target']['ce'] = self.stylization['target'].get('ce', [('original', 'original')])
         self.stylization['target']['average_ce'] = self.stylization['target'].get('average_ce', False)
         self.stylization['target']['inv'] = self.stylization['target'].get('inv', [])
-        assert len(self.stylization['target']['ce']) > 0
+        # assert len(self.stylization['target']['ce']) > 0
         self.stylization['inv_loss'] = self.stylization.get('inv_loss', {})
         self.stylization['inv_loss']['norm'] = self.stylization['inv_loss'].get('norm', 'l2')
         self.stylization['inv_loss']['weight'] = self.stylization['inv_loss'].get('weight', 1.0)
         # Compatibility to initial implementation using only output features of network neck for invariance loss.
         if isinstance(self.stylization['inv_loss']['weight'], float):
             self.stylization['inv_loss']['weight'] = [self.stylization['inv_loss']['weight'], 0.0, 0.0, 0.0, 0.0]
+        # Invariance loss weight on target domain is equal to respective weight on source domain by default.
+        self.stylization['inv_loss']['weight_target'] = self.stylization['inv_loss'].get('weight_target', self.stylization['inv_loss']['weight'])
+        # Compatibility to initial implementation using only output features of network neck for invariance loss.
+        if isinstance(self.stylization['inv_loss']['weight_target'], float):
+            self.stylization['inv_loss']['weight_target'] = [self.stylization['inv_loss']['weight_target'], 0.0, 0.0, 0.0, 0.0]
         self.stylization['inv_loss']['class_average'] = self.stylization['inv_loss'].get('class_average', False)
 
     def calculate_feature_invariance_loss_class_averaged(self,
@@ -123,7 +128,8 @@ class DACSDISS(DACS):
     def calculate_feature_invariance_loss(self,
                                           feats_input,
                                           feats_ref,
-                                          gt=None):
+                                          gt=None,
+                                          source=True):
         """Function for calculating feature invariance loss.
 
         Args:
@@ -155,7 +161,10 @@ class DACSDISS(DACS):
                         feature_invariance_losses.append(torch.nn.functional.l1_loss(feats_input[l], feats_ref[l], reduction='mean'))
                 else:
                     feature_invariance_losses.append(self.calculate_feature_invariance_loss_class_averaged(feats_input[l], feats_ref[l], gt))
-        feature_invariance_loss = sum(weight * loss for loss, weight in zip(feature_invariance_losses, self.stylization['inv_loss']['weight']))
+        if source:
+            feature_invariance_loss = sum(weight * loss for loss, weight in zip(feature_invariance_losses, self.stylization['inv_loss']['weight']))
+        else: # target
+            feature_invariance_loss = sum(weight * loss for loss, weight in zip(feature_invariance_losses, self.stylization['inv_loss']['weight_target']))
         inv_loss, inv_log = self._parse_losses({'inv_loss': feature_invariance_loss})
         inv_log.pop('loss', None)
         return inv_loss, inv_log
@@ -301,7 +310,7 @@ class DACSDISS(DACS):
         
         # 4) Feature invariance loss between original and stylized versions of source images.
         if self.stylization['source']['inv']:
-            inv_src_loss, inv_src_log = self.calculate_feature_invariance_loss(src_feat, src_feat_stylized, gt=gt_semantic_seg)
+            inv_src_loss, inv_src_log = self.calculate_feature_invariance_loss(src_feat, src_feat_stylized, gt=gt_semantic_seg, source=True)
             log_vars.update(add_prefix(inv_src_log, 'src'))
             inv_src_loss.backward()
 
@@ -446,7 +455,7 @@ class DACSDISS(DACS):
                                                                    return_feat=True,
                                                                    return_seg_loss=False)
                     feats_cached[j][i] = mix_losses.pop('features')
-            mix_inv_loss, mix_inv_logs[j] = self.calculate_feature_invariance_loss(feats_cached[j][0], feats_cached[j][1], gt=pseudo_label.unsqueeze(1))
+            mix_inv_loss, mix_inv_logs[j] = self.calculate_feature_invariance_loss(feats_cached[j][0], feats_cached[j][1], gt=pseudo_label.unsqueeze(1), source=False)
             log_vars.update(add_prefix(mix_inv_logs[j], '_'.join(['mix', ''.join(t[0][:]), ''.join(t[1][:])])))
             mix_inv_loss.backward(retain_graph=(j < len(self.stylization['target']['inv']) - 1))
         del gt_pixel_weight, pseudo_weight
@@ -459,7 +468,7 @@ class DACSDISS(DACS):
             vis_img_stylized = torch.clamp(denorm(img_stylized, means, stds), 0, 1)
             vis_trg_img = torch.clamp(denorm(target_img, means, stds), 0, 1)
             vis_trg_img_stylized = torch.clamp(denorm(target_img_stylized, means, stds), 0, 1)
-            vis_mixed_img = torch.clamp(denorm(mixed_img[0], means, stds), 0, 1)
+            # vis_mixed_img = torch.clamp(denorm(mixed_img[0], means, stds), 0, 1)
             for j in range(batch_size):
                 rows, cols = 2, 5
                 fig, axs = plt.subplots(
@@ -494,8 +503,9 @@ class DACSDISS(DACS):
                     axs[0][3], mix_masks[j][0], 'Domain Mask', cmap='gray')
                 # subplotimg(axs[0][3], pred_u_s[j], "Seg Pred",
                 #            cmap="cityscapes")
-                subplotimg(
-                    axs[1][3], mixed_lbl[0][j], 'Seg Targ', cmap='cityscapes')
+                if len(self.stylization['target']['ce']) > 0:
+                    subplotimg(
+                        axs[1][3], mixed_lbl[0][j], 'Seg Targ', cmap='cityscapes')
                 # subplotimg(
                 #     axs[0][3], pseudo_weight[j], 'Pseudo W.', vmin=0, vmax=1)
                 if self.debug_fdist_mask is not None:
