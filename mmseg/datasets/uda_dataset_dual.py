@@ -71,12 +71,20 @@ class UDADatasetDual(CustomDatasetDual):
                  data_root_target=None,
                  test_mode=False,
                  ignore_index=255,
+                 crop_pseudo_margins_target=None,
+                 valid_mask_size_target=None,
                  reduce_zero_label=False,
                  classes=None,
                  palette=None,
                  sync_crop_size=None,
                  rare_class_sampling=None):
                  
+        if crop_pseudo_margins_target is not None:
+            assert pipeline[-1]['type'] == 'Collect'
+            pipeline[-1]['keys'][-1].append('valid_pseudo_mask')
+        # super(CityscapesDataset, self).__init__(
+        #     img_suffix=img_suffix, seg_map_suffix=seg_map_suffix, **kwargs)
+
         super(UDADatasetDual, self).__init__(pipeline=pipeline,
                                              img_dir_source=img_dir_source,
                                              img_dir_target=img_dir_target,
@@ -92,6 +100,8 @@ class UDADatasetDual(CustomDatasetDual):
                                              data_root_target=data_root_target,
                                              test_mode=test_mode,
                                              ignore_index=ignore_index,
+                                             crop_pseudo_margins_target=crop_pseudo_margins_target,
+                                             valid_mask_size_target=valid_mask_size_target,
                                              reduce_zero_label=reduce_zero_label,
                                              classes=classes,
                                              palette=palette)
@@ -130,6 +140,26 @@ class UDADatasetDual(CustomDatasetDual):
                 if self.source == 'Cityscapes':
                     file = file.split('/')[-1]
                 self.file_to_idx[file] = i
+
+    def pre_pipeline(self, results):
+        super(UDADatasetDual, self).pre_pipeline(results)
+        if self.crop_pseudo_margins_target is not None:
+            results['target']['valid_pseudo_mask'] = np.ones(
+                self.valid_mask_size_target, dtype=np.uint8)
+            # Don't trust pseudo-labels in regions with potential
+            # rectification artifacts. This can lead to a pseudo-label
+            # drift from sky towards building or traffic light.
+            if self.crop_pseudo_margins_target[0] > 0:
+                results['target']['valid_pseudo_mask'][:self.crop_pseudo_margins_target[0], :] = 0
+            # Here, the if statement is absolutely necessary
+            if self.crop_pseudo_margins_target[1] > 0:
+                results['target']['valid_pseudo_mask'][-self.crop_pseudo_margins_target[1]:, :] = 0
+            if self.crop_pseudo_margins_target[2] > 0:
+                results['target']['valid_pseudo_mask'][:, :self.crop_pseudo_margins_target[2]] = 0
+            # Here, the if statement is absolutely necessary
+            if self.crop_pseudo_margins_target[3] > 0:
+                results['target']['valid_pseudo_mask'][:, -self.crop_pseudo_margins_target[3]:] = 0
+            results['target']['seg_fields'].append('valid_pseudo_mask')
 
     def synchronized_crop(self, s1, s2):
         if self.sync_crop_size is None:

@@ -92,6 +92,8 @@ class CustomDatasetDual(Dataset):
                  data_root_target=None,
                  test_mode=False,
                  ignore_index=255,
+                 crop_pseudo_margins_target=None,
+                 valid_mask_size_target=None,
                  reduce_zero_label=False,
                  classes=None,
                  palette=None):
@@ -110,6 +112,8 @@ class CustomDatasetDual(Dataset):
         self.data_root_target = data_root_target
         self.test_mode = test_mode
         self.ignore_index = ignore_index
+        self.crop_pseudo_margins_target = crop_pseudo_margins_target
+        self.valid_mask_size_target = valid_mask_size_target
         self.reduce_zero_label = reduce_zero_label
         self.label_map = None
         self.CLASSES, self.PALETTE = self.get_classes_and_palette(
