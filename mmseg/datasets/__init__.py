@@ -3,6 +3,7 @@ from .builder import DATASETS, PIPELINES, build_dataloader, build_dataset
 from .cityscapes import CityscapesDataset
 from .custom import CustomDataset
 from .dark_zurich import DarkZurichDataset
+from .bdd100k import BDD100KDataset
 from .dataset_wrappers import ConcatDataset, RepeatDataset
 from .gta import GTADataset
 from .synthia import SynthiaDataset
@@ -24,4 +25,5 @@ __all__ = [
     'UDADatasetDual',
     'ACDCDataset',
     'DarkZurichDataset',
+    'BDD100KDataset',
 ]
