@@ -2980,7 +2980,8 @@ def generate_experiment_cfgs(id):
                     source, target, crop, rcs_min_crop = dataset
                     gpu_model = 'NVIDIATITANRTX'
                     cfg = config_from_vars()
-                    cfgs.append(cfg)    else:
+                    cfgs.append(cfg)
+    else:
         raise NotImplementedError('Unknown id {}'.format(id))
 
     return cfgs
