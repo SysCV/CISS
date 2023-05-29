@@ -2975,6 +2975,10 @@ def generate_experiment_cfgs(id):
         ]:
             for inv_loss_weight in [
                 [0.0, 0.0, 0.0, 0.0, 0.001],
+                [0.0, 0.0, 0.0, 0.0, 0.01],
+                [0.0, 0.0, 0.0, 0.0, 0.1],
+                [0.0, 0.0, 0.0, 0.0, 1.0],
+                [0.0, 0.0, 0.0, 0.0, 10.0],
             ]:
                 for seed in seeds:
                     source, target, crop, rcs_min_crop = dataset

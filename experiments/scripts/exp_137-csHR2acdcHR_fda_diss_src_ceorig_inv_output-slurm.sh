@@ -19,7 +19,7 @@
 #SBATCH --gres=gpumem:30g
 #
 # Specify range of tasks for job array.
-#SBATCH --array=0-2
+#SBATCH --array=0-14
 #
 # Specify file for logging standard output.
 #SBATCH --output=../logs/exp_137-csHR2acdcHR_fda_diss_src_ceorig_inv_output-slurm-01-%a.o
