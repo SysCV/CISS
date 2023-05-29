@@ -1,3 +1,3 @@
-# DISS
+# CISS
 
-Domain-Invariant Semantic Segmentation
+Condition-Invariant Semantic Segmentation
