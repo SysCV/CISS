@@ -16,7 +16,7 @@
 #SBATCH --gpus=1
 #
 # Specify required GPU memory.
-#SBATCH --gres=gpumem:30g
+#SBATCH --gres=gpumem:50g
 #
 # Specify range of tasks for job array.
 #SBATCH --array=0-2
