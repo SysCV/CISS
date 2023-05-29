@@ -16,10 +16,10 @@
 #SBATCH --gpus=rtx_3090:1
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_51-csHR2acdcHR_fda_diss_src_cestylized-slurm-37.o
+#SBATCH --output=../logs/exp_51-csHR2acdcHR_fda_ciss_src_cestylized-slurm-37.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_51-csHR2acdcHR_fda_diss_src_cestylized-slurm-37.e
+#SBATCH --error=../logs/exp_51-csHR2acdcHR_fda_ciss_src_cestylized-slurm-37.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
@@ -31,7 +31,7 @@ EXP_ID="51"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export SOURCE_DATASET="cityscapes"
 export TARGET_DATASET="acdc"
 export DIR_SOURCE_DATASET="${TMPDIR}/${SOURCE_DATASET}"
@@ -41,7 +41,7 @@ export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/ACDC/ACDC_splits.tar.
 
 # Perform initialization operations for the experiment.
 cd ${SOURCE_DIR}
-source /cluster/home/csakarid/DISS/bin/activate
+source /cluster/home/csakarid/CISS/bin/activate
 ./experiments/scripts/initialization.sh
 python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
 
@@ -49,7 +49,7 @@ python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
 python run_experiments.py --exp ${EXP_ID}
 
 # Perform finalization operations.
-# Deactivate virtual environment for DISS.
+# Deactivate virtual environment for CISS.
 deactivate
 ./experiments/scripts/finalization.sh
 

@@ -16,16 +16,16 @@
 #SBATCH --gpus=rtx_3090:2
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm-31-02.o
+#SBATCH --output=../logs/exp_87-csHR2acdcHR_fda_ciss_src_cestylized_inv10-gpus2_distributed-slurm-31-02.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm-31-02.e
+#SBATCH --error=../logs/exp_87-csHR2acdcHR_fda_ciss_src_cestylized_inv10-gpus2_distributed-slurm-31-02.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
 #
 # Specify jobname.
-#SBATCH --job-name=exp_87-csHR2acdcHR_fda_diss_src_cestylized_inv10-gpus2_distributed-slurm
+#SBATCH --job-name=exp_87-csHR2acdcHR_fda_ciss_src_cestylized_inv10-gpus2_distributed-slurm
 #
 # Specify dependency.
 #SBATCH --dependency=singleton
@@ -37,7 +37,7 @@ EXP_ID="87"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export SOURCE_DATASET="cityscapes"
 export TARGET_DATASET="acdc"
 export DIR_SOURCE_DATASET="${TMPDIR}/${SOURCE_DATASET}"
@@ -52,14 +52,14 @@ export SEED_TO_RESUME_FROM="1"
 cd ${SOURCE_DIR}
 module load gcc/8.2.0 python_gpu/3.10.4 eth_proxy pigz
 ./experiments/scripts/initialization_torch_1_11.sh
-source /cluster/home/csakarid/DISS_torch_1_9/bin/activate
+source /cluster/home/csakarid/CISS_torch_1_9/bin/activate
 python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:256
 
 # Run the experiment.
 python -m torch.distributed.launch --nproc_per_node=2 --nnodes=1 --node_rank=0 run_experiments.py --exp ${EXP_ID} --seed-to-resume-from ${SEED_TO_RESUME_FROM}
 
-# Deactivate virtual environment for DISS.
+# Deactivate virtual environment for CISS.
 deactivate
 
 /bin/echo Finished on: `date`

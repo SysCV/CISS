@@ -28,7 +28,7 @@ EXP_ID="50"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export SOURCE_DATASET="cityscapes"
 export TARGET_DATASET="acdc"
 export DIR_SOURCE_DATASET="${TMPDIR}/${SOURCE_DATASET}"

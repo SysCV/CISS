@@ -19,10 +19,10 @@
 #BSUB -R "select[gpu_mtotal0>=30000]"
 #
 # Specify file for logging standard output.
-#BSUB -o ../logs/exp_100-csHR2darkzurichHR_fda_diss_src_cestylized-02.o
+#BSUB -o ../logs/exp_100-csHR2darkzurichHR_fda_ciss_src_cestylized-02.o
 #
 # Specify file for logging standard error.
-#BSUB -e ../logs/exp_100-csHR2darkzurichHR_fda_diss_src_cestylized-02.e
+#BSUB -e ../logs/exp_100-csHR2darkzurichHR_fda_ciss_src_cestylized-02.e
 
 /bin/echo Starting on: `date`
 
@@ -31,7 +31,7 @@ EXP_ID="100"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export SOURCE_DATASET="cityscapes"
 export TARGET_DATASET="darkzurich"
 export DIR_SOURCE_DATASET="${TMPDIR}/${SOURCE_DATASET}"
@@ -43,13 +43,13 @@ export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/Dark_Zurich/Dark_Zuri
 cd ${SOURCE_DIR}
 module load gcc/8.2.0 python_gpu/3.10.4 eth_proxy pigz
 ./experiments/scripts/initialization_torch_1_11.sh
-source /cluster/home/csakarid/DISS_torch_1_9/bin/activate
+source /cluster/home/csakarid/CISS_torch_1_9/bin/activate
 python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
 
 # Run the experiment.
 python run_experiments.py --exp ${EXP_ID}
 
-# Deactivate virtual environment for DISS.
+# Deactivate virtual environment for CISS.
 deactivate
 
 /bin/echo Finished on: `date`

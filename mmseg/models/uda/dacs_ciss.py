@@ -25,10 +25,10 @@ from mmseg.utils.utils import downscale_label_ratio
 
 
 @UDA.register_module()
-class DACSDISS(DACS):
+class DACSCISS(DACS):
 
     def __init__(self, **cfg):
-        super(DACSDISS, self).__init__(**cfg)
+        super(DACSCISS, self).__init__(**cfg)
         # self.local_iter = 0
         # self.max_iters = cfg['max_iters']
         # self.alpha = cfg['alpha']

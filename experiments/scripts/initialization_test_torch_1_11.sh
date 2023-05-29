@@ -3,8 +3,8 @@
 # Load modules.
 # module load gcc/8.2.0 python_gpu/3.10.4 eth_proxy pigz
 
-# Activate virtual environment for DISS.
-# source /cluster/home/csakarid/DISS/bin/activate
+# Activate virtual environment for CISS.
+# source /cluster/home/csakarid/CISS/bin/activate
 
 # Copy datasets to local scratch of compute node.
 /bin/echo Starting dataset copying on: `date`

@@ -19,10 +19,10 @@
 #BSUB -R "select[gpu_mtotal0>=30000]"
 #
 # Specify file for logging standard output.
-#BSUB -o ../logs/exp_62-csHR2acdcHR_fda_diss_src_cestylized_inv_batch2-01.o
+#BSUB -o ../logs/exp_62-csHR2acdcHR_fda_ciss_src_cestylized_inv_batch2-01.o
 #
 # Specify file for logging standard error.
-#BSUB -e error=../logs/exp_62-csHR2acdcHR_fda_diss_src_cestylized_inv_batch2-01.e
+#BSUB -e error=../logs/exp_62-csHR2acdcHR_fda_ciss_src_cestylized_inv_batch2-01.e
 
 /bin/echo Starting on: `date`
 
@@ -31,7 +31,7 @@ EXP_ID="62"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export SOURCE_DATASET="cityscapes"
 export TARGET_DATASET="acdc"
 export DIR_SOURCE_DATASET="${TMPDIR}/${SOURCE_DATASET}"
@@ -41,14 +41,14 @@ export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/ACDC/ACDC_splits.tar.
 
 # Perform initialization operations for the experiment.
 cd ${SOURCE_DIR}
-source /cluster/home/csakarid/DISS/bin/activate
+source /cluster/home/csakarid/CISS/bin/activate
 ./experiments/scripts/initialization.sh
 python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
 
 # Run the experiment.
 python run_experiments.py --exp ${EXP_ID}
 
-# Deactivate virtual environment for DISS.
+# Deactivate virtual environment for CISS.
 deactivate
 
 /bin/echo Finished on: `date`

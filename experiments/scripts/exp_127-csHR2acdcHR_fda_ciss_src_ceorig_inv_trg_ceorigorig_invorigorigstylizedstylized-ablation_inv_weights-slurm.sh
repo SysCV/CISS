@@ -22,16 +22,16 @@
 #SBATCH --array=0-5
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_127-csHR2acdcHR_fda_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-ablation_inv_weights-slurm-01-%a.o
+#SBATCH --output=../logs/exp_127-csHR2acdcHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-ablation_inv_weights-slurm-01-%a.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_127-csHR2acdcHR_fda_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-ablation_inv_weights-slurm-01-%a.e
+#SBATCH --error=../logs/exp_127-csHR2acdcHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-ablation_inv_weights-slurm-01-%a.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
 #
 # Specify jobname.
-#SBATCH --job-name=exp_127-csHR2acdcHR_fda_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-ablation_inv_weights-slurm-01
+#SBATCH --job-name=exp_127-csHR2acdcHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-ablation_inv_weights-slurm-01
 
 /bin/echo Starting on: `date`
 
@@ -40,7 +40,7 @@ EXP_ID="127"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export SOURCE_DATASET="cityscapes"
 export TARGET_DATASET="acdc"
 export DIR_SOURCE_DATASET="${TMPDIR}/${SOURCE_DATASET}"
@@ -50,7 +50,7 @@ export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/ACDC/ACDC_splits.tar.
 
 # Perform initialization operations for the experiment.
 cd ${SOURCE_DIR}
-source /cluster/home/csakarid/DISS/bin/activate
+source /cluster/home/csakarid/CISS/bin/activate
 ./experiments/scripts/initialization.sh
 python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
 

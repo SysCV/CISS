@@ -389,7 +389,7 @@ def generate_experiment_cfgs(id):
     ]
     stylization = None
     architecture = None
-    diss_config = None
+    ciss_config = None
     inv_loss_weight = None
     inv_loss_weight_target = None
     inv_loss_norm = None
@@ -623,7 +623,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------
-    # FDA baseline for DISS on Cityscapes -> ACDC. First attempt.
+    # FDA baseline for CISS on Cityscapes -> ACDC. First attempt.
     # -------------------------------------------------------------------------
     elif id == 51:
         seeds = [0, 1, 2]
@@ -631,7 +631,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 32
         for dataset, architecture, sync_crop_size in [
@@ -643,7 +643,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # CISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
     # --------------------------------------------------------------------------------------------
     elif id == 52:
         seeds = [0, 1, 2]
@@ -651,7 +651,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -664,7 +664,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 53:
         seeds = [0, 1, 2]
@@ -672,7 +672,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -685,7 +685,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
+    # CISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 54:
         seeds = [0, 1, 2]
@@ -693,7 +693,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig_inv', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -706,7 +706,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
     # ---------------------------------------------------------------------------------------------------------------
     elif id == 55:
         seeds = [0, 1, 2]
@@ -714,7 +714,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -727,7 +727,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 56:
         seeds = [0, 1, 2]
@@ -735,7 +735,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -748,7 +748,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 57:
         seeds = [0, 1, 2]
@@ -756,7 +756,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -769,7 +769,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 58:
         seeds = [0, 1, 2]
@@ -777,7 +777,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -790,7 +790,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 59:
         seeds = [0, 1, 2]
@@ -798,7 +798,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -811,7 +811,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 60:
         seeds = [0, 1, 2]
@@ -819,7 +819,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -832,7 +832,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 61:
         seeds = [0, 1, 2]
@@ -840,7 +840,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 32
@@ -853,7 +853,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 62:
         seeds = [0, 1, 2]
@@ -861,7 +861,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -874,7 +874,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # CISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
     # --------------------------------------------------------------------------------------------
     elif id == 63:
         seeds = [0, 1, 2]
@@ -882,7 +882,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -895,7 +895,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
+    # CISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 64:
         seeds = [0, 1, 2]
@@ -903,7 +903,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig_inv', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -916,7 +916,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
     # ---------------------------------------------------------------------------------------------------------------
     elif id == 65:
         seeds = [0, 1, 2]
@@ -924,7 +924,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -937,7 +937,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 66:
         seeds = [0, 1, 2]
@@ -945,7 +945,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -958,7 +958,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 67:
         seeds = [0, 1, 2]
@@ -966,7 +966,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -979,7 +979,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 68:
         seeds = [0, 1, 2]
@@ -987,7 +987,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -1000,7 +1000,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 69:
         seeds = [0, 1, 2]
@@ -1008,7 +1008,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -1021,7 +1021,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 70:
         seeds = [0, 1, 2]
@@ -1029,7 +1029,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -1042,7 +1042,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 71:
         seeds = [0, 1, 2]
@@ -1050,7 +1050,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -1063,7 +1063,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Crop -> 960x960
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Crop -> 960x960
     # -----------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 72:
         seeds = [0, 1, 2]
@@ -1071,7 +1071,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '960x960', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -1084,7 +1084,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Crop -> 960x960. Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Crop -> 960x960. Inv weight -> 10.0
     # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 73:
         seeds = [0, 1, 2]
@@ -1092,7 +1092,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '960x960', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         batch_size = 2
         workers_per_gpu = 32
@@ -1105,7 +1105,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # CISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
     # --------------------------------------------------------------------------------------------
     elif id == 74:
         seeds = [0, 1, 2]
@@ -1113,7 +1113,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1127,7 +1127,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 75:
         seeds = [0, 1, 2]
@@ -1135,7 +1135,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1149,7 +1149,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
+    # CISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 76:
         seeds = [0, 1, 2]
@@ -1157,7 +1157,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1171,7 +1171,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
     # ---------------------------------------------------------------------------------------------------------------
     elif id == 77:
         seeds = [0, 1, 2]
@@ -1179,7 +1179,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1193,7 +1193,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 78:
         seeds = [0, 1, 2]
@@ -1201,7 +1201,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1215,7 +1215,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 79:
         seeds = [0, 1, 2]
@@ -1223,7 +1223,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1237,7 +1237,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 80:
         seeds = [0, 1, 2]
@@ -1245,7 +1245,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1259,7 +1259,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 81:
         seeds = [0, 1, 2]
@@ -1267,7 +1267,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1281,7 +1281,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 82:
         seeds = [0, 1, 2]
@@ -1289,7 +1289,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1303,7 +1303,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 83:
         seeds = [0, 1, 2]
@@ -1311,7 +1311,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         n_gpus = 2
         batch_size = 1
@@ -1325,7 +1325,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)    
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # CISS ablation study on source domain - Part 2: CE stylized -> Y, CE original -> Y, Inv -> N.
     # --------------------------------------------------------------------------------------------
     elif id == 84:
         seeds = [0, 1, 2]
@@ -1333,7 +1333,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1350,7 +1350,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 85:
         seeds = [0, 1, 2]
@@ -1358,7 +1358,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1375,7 +1375,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
+    # CISS ablation study on source domain - Part 4: CE stylized -> Y, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------
     elif id == 86:
         seeds = [0, 1, 2]
@@ -1383,7 +1383,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1400,7 +1400,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on source domain - Part 3: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weight -> 10.0
     # ---------------------------------------------------------------------------------------------------------------
     elif id == 87:
         seeds = [0, 1, 2]
@@ -1408,7 +1408,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1425,7 +1425,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 88:
         seeds = [0, 1, 2]
@@ -1433,7 +1433,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1450,7 +1450,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 89:
         seeds = [0, 1, 2]
@@ -1458,7 +1458,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1475,7 +1475,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 4: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------
     elif id == 90:
         seeds = [0, 1, 2]
@@ -1483,7 +1483,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1500,7 +1500,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 3: CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y. Inv weight -> 10.0
     # --------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 91:
         seeds = [0, 1, 2]
@@ -1508,7 +1508,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_ceorigorig_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1525,7 +1525,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.
     # ---------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 92:
         seeds = [0, 1, 2]
@@ -1533,7 +1533,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1550,7 +1550,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
+    # CISS ablation study on target domain with CE stylized + Inv on source - Part 5: CE origorig -> N, CE stylizedstylized -> Y, Inv -> Y, Pseudo -> Stylized.  Inv weight -> 10.0
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 93:
         seeds = [0, 1, 2]
@@ -1558,7 +1558,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv10_trg_pseudostylized_cestylizedstylized_invorigorigstylizedstylized10', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1575,7 +1575,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)    
     # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on CE loss weighting - Part 2: Source: CE stylized -> 0.5, CE original -> 0.5, Inv -> N, Target: CE origorig -> 1.0, CE stylizedstylized -> N, Inv -> N.
+    # CISS ablation study on CE loss weighting - Part 2: Source: CE stylized -> 0.5, CE original -> 0.5, Inv -> N, Target: CE origorig -> 1.0, CE stylizedstylized -> N, Inv -> N.
     # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 94:
         seeds = [0, 1, 2]
@@ -1583,7 +1583,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig_avgce', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig_avgce', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1600,7 +1600,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weights -> 0.0, 0.0, 0.0, 0.0, 1.0
+    # CISS ablation study on invariance loss weights: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weights -> 0.0, 0.0, 0.0, 0.0, 1.0
     # ------------------------------------------------------------------------------------------------------------------------------------
     elif id == 95:
         seeds = [0, 1, 2]
@@ -1608,7 +1608,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_output', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_output', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1625,7 +1625,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weights -> 0.0, 0.0, 0.0, 0.0, 1.0
+    # CISS ablation study on invariance loss weights: CE stylized -> Y, CE original -> N, Inv -> Y. Inv weights -> 0.0, 0.0, 0.0, 0.0, 1.0
     # ------------------------------------------------------------------------------------------------------------------------------------
     elif id == 96:
         seeds = [0, 1, 2]
@@ -1633,7 +1633,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_output', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_output', 0.01, False
         inference = 'slide'
         batch_size = 1
         workers_per_gpu = 8
@@ -1646,7 +1646,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 97:
         seeds = [0]
@@ -1654,7 +1654,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1699,7 +1699,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in target domain: CE stylized on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS ablation study on invariance loss weights in target domain: CE stylized on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 98:
         seeds = [0]
@@ -1707,7 +1707,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1771,7 +1771,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # ---------------------------------------------------
-    # FDA baseline for DISS on Cityscapes -> Dark Zurich.
+    # FDA baseline for CISS on Cityscapes -> Dark Zurich.
     # ---------------------------------------------------
     elif id == 100:
         seeds = [0, 1, 2]
@@ -1779,7 +1779,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -1791,7 +1791,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 101:
         seeds = [0]
@@ -1799,7 +1799,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1828,7 +1828,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 102:
         seeds = [0]
@@ -1836,7 +1836,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1862,7 +1862,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> Y, CE original -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 103:
         seeds = [0]
@@ -1870,7 +1870,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_invclassavg', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_invclassavg', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1899,7 +1899,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ------------------------------------------------------------
-    # DISS ablation study on invariance loss weights with L1 loss.
+    # CISS ablation study on invariance loss weights with L1 loss.
     # ------------------------------------------------------------
     elif id == 104:
         seeds = [0]
@@ -1907,7 +1907,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inv_loss_norm = 'l1'
         inference = 'slide'
         n_gpus = 2
@@ -1931,7 +1931,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 105:
         seeds = [0]
@@ -1939,7 +1939,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1968,7 +1968,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 106:
         seeds = [0]
@@ -1976,7 +1976,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -1999,7 +1999,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ------------------------------------------------------------
-    # DISS ablation study on invariance loss weights with L1 loss.
+    # CISS ablation study on invariance loss weights with L1 loss.
     # ------------------------------------------------------------
     elif id == 107:
         seeds = [0]
@@ -2007,7 +2007,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv', 0.01, False
         inv_loss_norm = 'l1'
         inference = 'slide'
         n_gpus = 2
@@ -2034,7 +2034,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ------------------------------------------------------------
-    # DISS ablation study on invariance loss weights with L1 loss.
+    # CISS ablation study on invariance loss weights with L1 loss.
     # ------------------------------------------------------------
     elif id == 108:
         seeds = [0]
@@ -2042,7 +2042,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inv_loss_norm = 'l1'
         inference = 'slide'
         n_gpus = 2
@@ -2069,7 +2069,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ----------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights on Cityscapes -> Dark Zurich.
+    # CISS ablation study on invariance loss weights on Cityscapes -> Dark Zurich.
     # ----------------------------------------------------------------------------
     elif id == 109:
         seeds = [1]
@@ -2077,7 +2077,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2106,7 +2106,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 110:
         seeds = [1]
@@ -2114,7 +2114,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2144,7 +2144,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # ----------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights on Cityscapes -> Dark Zurich.
+    # CISS ablation study on invariance loss weights on Cityscapes -> Dark Zurich.
     # ----------------------------------------------------------------------------
     elif id == 111:
         seeds = [0]
@@ -2152,7 +2152,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2205,7 +2205,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 112:
         seeds = [0]
@@ -2213,7 +2213,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2242,7 +2242,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain: CE stylized -> Y, CE original -> Y, Inv -> N.
+    # CISS ablation study on target domain: CE stylized -> Y, CE original -> Y, Inv -> N.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 113:
         seeds = [0]
@@ -2250,7 +2250,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2270,7 +2270,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS ablation study on invariance loss weights in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 114:
         seeds = [0]
@@ -2278,7 +2278,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2302,7 +2302,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 115:
         seeds = [0]
@@ -2310,7 +2310,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2361,7 +2361,7 @@ def generate_experiment_cfgs(id):
                 cfgs.append(cfg)
 
     # ---------------------------------------------------------------------------------------------------------------------------------
-    # DISS GTA5 -> Cityscapes ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # CISS GTA5 -> Cityscapes ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # ---------------------------------------------------------------------------------------------------------------------------------
     elif id == 117:
         seeds = [0]
@@ -2369,7 +2369,7 @@ def generate_experiment_cfgs(id):
         gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, 'v2'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv', 0.01, 'v2'
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2395,7 +2395,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ------------------------------------------------
-    # DISS ablation study on CE loss in target domain.
+    # CISS ablation study on CE loss in target domain.
     # ------------------------------------------------
     elif id == 118:
         seeds = [0]
@@ -2403,7 +2403,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2426,7 +2426,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS GTA5 -> Cityscapes ablation study on invariance loss weights in target domain:  CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS GTA5 -> Cityscapes ablation study on invariance loss weights in target domain:  CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # -------------------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 119:
         seeds = [0]
@@ -2434,7 +2434,7 @@ def generate_experiment_cfgs(id):
         gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2460,7 +2460,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 120:
         seeds = [0]
@@ -2468,7 +2468,7 @@ def generate_experiment_cfgs(id):
         gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
         inference = 'slide'
         # n_gpus = 2
         # launcher = 'pytorch'
@@ -2534,7 +2534,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 123:
         seeds = [0]
@@ -2542,7 +2542,7 @@ def generate_experiment_cfgs(id):
         gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2571,7 +2571,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------
-    # DISS Reinhard ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # CISS Reinhard ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # -----------------------------------------------------------------------------------------------------------------------
     elif id == 124:
         seeds = [0]
@@ -2579,7 +2579,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'reinhard'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2603,7 +2603,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------------------------------------------
-    # DISS Reinhard ablation study on invariance loss weights in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS Reinhard ablation study on invariance loss weights in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------------------------------------------
     elif id == 125:
         seeds = [0]
@@ -2611,7 +2611,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'reinhard'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2635,7 +2635,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------
-    # DISS Reinhard ablation study on invariance loss weights.
+    # CISS Reinhard ablation study on invariance loss weights.
     # --------------------------------------------------------
     elif id == 126:
         seeds = [0]
@@ -2643,7 +2643,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'reinhard'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         n_gpus = 2
         launcher = 'pytorch'
@@ -2674,7 +2674,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 127:
         seeds = [0, 1, 2]
@@ -2682,7 +2682,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         # n_gpus = 2
         # launcher = 'pytorch'
@@ -2703,7 +2703,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------
-    # DISS Reinhard ablation study on invariance loss weights.
+    # CISS Reinhard ablation study on invariance loss weights.
     # --------------------------------------------------------
     elif id == 128:
         seeds = [0]
@@ -2711,7 +2711,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'reinhard'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         # n_gpus = 2
         # launcher = 'pytorch'
@@ -2742,7 +2742,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 129:
         seeds = [0, 1, 2]
@@ -2750,7 +2750,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2774,7 +2774,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # CISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------------
     elif id == 130:
         seeds = [0, 1, 2]
@@ -2782,7 +2782,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2806,7 +2806,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ------------------------------------------------------------------
-    # DISS GTA5 -> Cityscapes ablation study on invariance loss weights.
+    # CISS GTA5 -> Cityscapes ablation study on invariance loss weights.
     # ------------------------------------------------------------------
     elif id == 131:
         seeds = [0, 1, 2]
@@ -2814,7 +2814,7 @@ def generate_experiment_cfgs(id):
         gta2cs = ('gtaHR',     'cityscapesHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, 'v2'
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2838,7 +2838,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # -----------------------------------------------
-    # DISS ablation study on invariance loss weights.
+    # CISS ablation study on invariance loss weights.
     # -----------------------------------------------
     elif id == 132:
         seeds = [0, 1, 2]
@@ -2846,7 +2846,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2870,7 +2870,7 @@ def generate_experiment_cfgs(id):
                         cfg = config_from_vars()
                         cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------
-    # DISS ablation study on target domain with CE orig + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
+    # CISS ablation study on target domain with CE orig + Inv on source - Part 2: CE origorig -> Y, CE stylizedstylized -> Y, Inv -> N.
     # ---------------------------------------------------------------------------------------------------------------------------------
     elif id == 133:
         seeds = [0, 1, 2]
@@ -2878,7 +2878,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_cestylizedstylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2893,7 +2893,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ----------------------------------------------------------------------------------------
-    # DISS ablation study on source domain - Part 2: CE orig -> Y, CE stylized -> Y, Inv -> N.
+    # CISS ablation study on source domain - Part 2: CE orig -> Y, CE stylized -> Y, Inv -> N.
     # ----------------------------------------------------------------------------------------
     elif id == 134:
         seeds = [0, 1, 2]
@@ -2901,7 +2901,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_cestylized_ceorig', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_cestylized_ceorig', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2913,7 +2913,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------------------
-    # DISS Cityscapes -> Dark Zurich, lambda_s = 100, lambda_t = 50.
+    # CISS Cityscapes -> Dark Zurich, lambda_s = 100, lambda_t = 50.
     # --------------------------------------------------------------
     elif id == 135:
         seeds = [0, 1, 2]
@@ -2921,7 +2921,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2936,7 +2936,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------
-    # DISS Reinhard in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
+    # CISS Reinhard in target domain: CE orig on source, CE origorig -> Y, CE stylizedstylized -> N, Inv -> Y.
     # --------------------------------------------------------------------------------------------------------
     elif id == 136:
         seeds = [0, 1, 2]
@@ -2944,7 +2944,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'reinhard'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [
@@ -2959,7 +2959,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ---------------------------------------------------------
-    # DISS ablation study on invariance point in source domain.
+    # CISS ablation study on invariance point in source domain.
     # ---------------------------------------------------------
     elif id == 137:
         seeds = [0, 1, 2]
@@ -2967,7 +2967,7 @@ def generate_experiment_cfgs(id):
         cs2acdc = ('cityscapesHR', 'acdcHR',       '1024x1024', 0.5 * (2 ** 2))
         stylization = 'fda'
         dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_diss_src_ceorig_inv', 0.01, False
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv', 0.01, False
         inference = 'slide'
         workers_per_gpu = 16
         for dataset, architecture, sync_crop_size in [

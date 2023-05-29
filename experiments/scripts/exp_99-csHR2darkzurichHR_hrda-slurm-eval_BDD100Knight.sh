@@ -31,19 +31,19 @@ EXP_ID="99"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
-export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/DISS"
+export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export TARGET_DATASET="bdd100k"
 export DIR_TARGET_DATASET="${TMPDIR}/${TARGET_DATASET}"
 export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/BDD100K/BDD100K_night.tar.gz"
-export TEST_ROOT="/cluster/work/cvl/csakarid/results/DISS/local-exp99/221024_0439_csHR2dzurHR_1024x1024_dacs_a999_fdthings_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s0_76827"
-export CONFIG_FILE="/cluster/work/cvl/csakarid/results/DISS/local-exp99/221024_0439_csHR2dzurHR_1024x1024_dacs_a999_fdthings_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s0_76827/230306_1111_csHR2dzurHR_1024x1024_dacs_a999_fdthings_diss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s1_56306_test_bdd100k.json"
+export TEST_ROOT="/cluster/work/cvl/csakarid/results/CISS/local-exp99/221024_0439_csHR2dzurHR_1024x1024_dacs_a999_fdthings_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s0_76827"
+export CONFIG_FILE="/cluster/work/cvl/csakarid/results/CISS/local-exp99/221024_0439_csHR2dzurHR_1024x1024_dacs_a999_fdthings_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s0_76827/230306_1111_csHR2dzurHR_1024x1024_dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s1_56306_test_bdd100k.json"
 export CHECKPOINT_FILE="${TEST_ROOT}/csHR2dzurHR_hrda_97e26/iter_40000_relevant.pth"
 
 # Perform initialization operations for the experiment.
 cd ${SOURCE_DIR}
 module load gcc/8.2.0 python_gpu/3.10.4 eth_proxy pigz
 ./experiments/scripts/initialization_test_torch_1_11.sh
-source /cluster/home/csakarid/DISS_torch_1_9/bin/activate
+source /cluster/home/csakarid/CISS_torch_1_9/bin/activate
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:256
 
 # Run the experiment.
