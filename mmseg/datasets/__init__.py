@@ -9,6 +9,7 @@ from .gta import GTADataset
 from .synthia import SynthiaDataset
 from .uda_dataset import UDADataset
 from .uda_dataset_dual import UDADatasetDual
+from .nighttime_driving import NighttimeDrivingDataset
 
 __all__ = [
     'CustomDataset',
@@ -26,4 +27,5 @@ __all__ = [
     'ACDCDataset',
     'DarkZurichDataset',
     'BDD100KDataset',
+    'NighttimeDrivingDataset',
 ]
