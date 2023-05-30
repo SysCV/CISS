@@ -49,8 +49,5 @@ python tools/convert_datasets/cityscapes.py data/cityscapes --nproc 8
 # Run the experiment.
 python run_experiments.py --exp ${EXP_ID}
 
-# Perform finalization operations.
-./experiments/scripts/finalization.sh
-
 /bin/echo Finished on: `date`
 
