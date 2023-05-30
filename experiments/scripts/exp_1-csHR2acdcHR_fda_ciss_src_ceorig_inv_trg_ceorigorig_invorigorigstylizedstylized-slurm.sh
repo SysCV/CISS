@@ -10,30 +10,30 @@
 #SBATCH --mem-per-cpu=8192
 #
 # Specify disk limit on local scratch.
-#SBATCH --tmp=300000
+#SBATCH --tmp=80000
 #
-# Specify GPU type and number of required GPUs.
-#SBATCH --gpus=rtx_3090:2
+# Specify number of required GPUs.
+#SBATCH --gpus=1
+#
+# Specify required GPU memory.
+#SBATCH --gres=gpumem:30g
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_85-csHR2acdcHR_fda_ciss_src_cestylized_inv-gpus2_distributed-slurm-01-01.o
+#SBATCH --output=../logs/exp_1-csHR2acdcHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_85-csHR2acdcHR_fda_ciss_src_cestylized_inv-gpus2_distributed-slurm-01-01.e
+#SBATCH --error=../logs/exp_1-csHR2acdcHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
 #
 # Specify jobname.
-#SBATCH --job-name=exp_85-csHR2acdcHR_fda_ciss_src_cestylized_inv-gpus2_distributed-slurm
-#
-# Specify dependency.
-#SBATCH --dependency=singleton
+#SBATCH --job-name=exp_1-csHR2acdcHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm
 
 /bin/echo Starting on: `date`
 
 # Experiment ID.
-EXP_ID="85"
+EXP_ID="1"
 
 # Specify directories.
 export TMPDIR="${TMPDIR}"
@@ -47,17 +47,12 @@ export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/ACDC/ACDC_splits.tar.
 
 # Perform initialization operations for the experiment.
 cd ${SOURCE_DIR}
-module load gcc/8.2.0 python_gpu/3.10.4 eth_proxy pigz
-./experiments/scripts/initialization_torch_1_11.sh
-source /cluster/home/csakarid/CISS_torch_1_9/bin/activate
+source /cluster/home/csakarid/CISS/bin/activate
+./experiments/scripts/initialization.sh
 python tools/convert_datasets/cityscapes.py ${DIR_SOURCE_DATASET} --nproc 8
-export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:256
 
 # Run the experiment.
-python -m torch.distributed.launch --nproc_per_node=2 --nnodes=1 --node_rank=0 --master_port=29503 run_experiments.py --exp ${EXP_ID}
-
-# Deactivate virtual environment for CISS.
-deactivate
+python run_experiments.py --exp ${EXP_ID}
 
 /bin/echo Finished on: `date`
 
