@@ -7,9 +7,9 @@
 # [SegFormer repository](https://github.com/NVlabs/SegFormer) and put them in a
 # folder `pretrained/` within this project. Only mit_b5.pth is necessary.
 #
-# Please, download the checkpoint of HRDA on GTA->Cityscapes from
-# [here](https://drive.google.com/file/d/1O6n1HearrXHZTHxNRWp8HCMyqbulKcSW/view?usp=sharing).
-# and extract it to `work_dirs/`
+# Please, download the checkpoint of CISS on Cityscapes->ACDC from
+# [here](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcHR_ciss_9fcab.tar.gz).
+# and extract it to `work_dirs/csHR2acdcHR_ciss_9fcab/`
 
 # Automatic Downloads:
 set -e  # exit when any command fails
@@ -20,7 +20,9 @@ cd ../
 
 mkdir -p work_dirs/
 cd work_dirs/
-gdown --id 1O6n1HearrXHZTHxNRWp8HCMyqbulKcSW  # HRDA on GTA->Cityscapes
-tar -xzf gtaHR2csHR_hrda_246ef.tar.gz
-rm gtaHR2csHR_hrda_246ef.tar.gz
-cd ../
+mkdir csHR2acdcHR_ciss_9fcab/
+cd csHR2acdcHR_ciss_9fcab/
+curl -O https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcHR_ciss_9fcab.tar.gz  # CISS on Cityscapes->ACDC
+tar -xzf csHR2acdcHR_ciss_9fcab.tar.gz
+rm csHR2acdcHR_ciss_9fcab.tar.gz
+cd ../../
