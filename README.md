@@ -4,7 +4,7 @@ A novel unsupervised domain adaptation method for semantic segmentation models, 
 
 **by [Christos Sakaridis](https://people.ee.ethz.ch/csakarid/), [David Bruggemann](https://scholar.google.com/citations?user=uX2PrWMAAAAJ&hl=en&oi=ao), [Fisher Yu](https://www.yf.io/) and [Luc Van Gool](https://vision.ee.ethz.ch/people-details.OTAyMzM=.TGlzdC8zMjcxLC0xOTcxNDY1MTc4.html)**
 
-**CISS**: [**Paper**][paper_pdf] | [**arXiv][arxiv]
+**CISS**: [**Paper**][paper_pdf] | [**arXiv**][arxiv]
 
 ## Overview
 
@@ -15,8 +15,6 @@ We implement our method, named **Condition-Invariant Semantic Segmentation (CISS
 This repository includes the source code for CISS.
 
 For more information on CISS, please check our [paper][paper_pdf].
-
-If you find CISS useful in your research, please cite our [arXiv paper][arxiv]:
 
 
 ## License
@@ -188,7 +186,7 @@ Below, we provide checkpoints of CISS for different benchmarks.
 
 The checkpoints come with the training logs. Please note that:
 
-* The logs provide the mIoU on validation sets. For Cityscapes→ACDC and Cityscapes→DarkZurich the main results reported in the paper (besides those belonging to ablations studies) are calculated on the respective test sets. For DarkZurich, the performance significantly differs between validation and test set. Please read the section above on how to obtain the test mIoU.
+* The logs provide the mIoU on validation sets. For Cityscapes→ACDC and Cityscapes→Dark Zurich the main results reported in the paper (besides those belonging to ablations studies) are calculated on the respective test sets. For Dark Zurich, the performance significantly differs between validation and test set. Please read the section above on how to obtain the test mIoU.
 
 ## Framework Structure
 
