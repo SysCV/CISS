@@ -43,7 +43,7 @@ For implementing CISS, we use two virtual Python environments, one for training 
 ```shell
 python -m venv ~/venv/CISS
 source ~/venv/CISS/bin/activate
-pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
+pip install -r requirements_train.txt -f https://download.pytorch.org/whl/torch_stable.html
 pip install mmcv-full==1.3.7  # requires the other packages to be installed first
 ```
 
