@@ -21,24 +21,11 @@ cityscapes_acdc_train_pipeline = [
     dict(type='RandomCrop', crop_size=crop_size, keys=['target']),
     dict(type='RandomFlip', prob=0.5, keys=['source']),
     dict(type='RandomFlip', prob=0.5, keys=['target']),
-    # dict(type='PhotoMetricDistortion'),  # is applied later in dacs.py
     dict(type='Normalize', **img_norm_cfg, keys=['source', 'target']),
     dict(type='Pad', size=crop_size, pad_val=0, seg_pad_val=255, keys=['source', 'target']),
     dict(type='DefaultFormatBundle', keys=['source', 'target']),
-    # dict(type='Collect', keys=['img', 'img_stylized'], parts=['target']),
     dict(type='Collect', keys=[['img', 'img_stylized', 'gt_semantic_seg'], ['img', 'img_stylized']], parts=['source', 'target']),
 ]
-# acdc_train_pipeline = [
-#     dict(type='LoadImageFromFile'),
-#     dict(type='Resize', img_scale=(1920, 1080)),
-#     dict(type='RandomCrop', crop_size=crop_size),
-#     dict(type='RandomFlip', prob=0.5),
-#     # dict(type='PhotoMetricDistortion'),  # is applied later in dacs.py
-#     dict(type='Normalize', **img_norm_cfg),
-#     dict(type='Pad', size=crop_size, pad_val=0, seg_pad_val=255),
-#     dict(type='DefaultFormatBundle'),
-#     dict(type='Collect', keys=['img']),
-# ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(

@@ -199,7 +199,6 @@ class EncoderDecoder(BaseSegmentor):
 
         return losses
 
-    # TODO refactor
     def slide_inference(self, img, img_meta, rescale):
         """Inference by sliding-window with overlap.
 

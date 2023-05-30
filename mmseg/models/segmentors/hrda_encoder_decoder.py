@@ -264,9 +264,4 @@ class HRDAEncoderDecoder(EncoderDecoder):
         assert not self.with_auxiliary_head
         mres_feats, _ = self._forward_train_features(img)
         out = self.decode_head.forward(mres_feats)
-        # out = resize(
-        #     input=out,
-        #     size=img.shape[2:],
-        #     mode='bilinear',
-        #     align_corners=self.align_corners)
         return {'main': out}

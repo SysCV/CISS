@@ -82,8 +82,6 @@ class UDADatasetDual(CustomDatasetDual):
         if crop_pseudo_margins_target is not None:
             assert pipeline[-1]['type'] == 'Collect'
             pipeline[-1]['keys'][-1].append('valid_pseudo_mask')
-        # super(CityscapesDataset, self).__init__(
-        #     img_suffix=img_suffix, seg_map_suffix=seg_map_suffix, **kwargs)
 
         super(UDADatasetDual, self).__init__(pipeline=pipeline,
                                              img_dir_source=img_dir_source,

@@ -1113,14 +1113,11 @@ class FDA(object):
     def low_freq_mutate_np(self, a_src, a_trg):
 
         h, w, _ = a_src.shape
-        # _, h, w = a_src.shape
         b = (np.floor(np.amin((h,w)) * self.bandwidth)).astype(int)
-        # print(b)
         c_h = np.floor(h/2.0).astype(int)
         c_w = np.floor(w/2.0).astype(int)
         
         h_trg, w_trg, _ = a_trg.shape
-        # _, h_trg, w_trg = a_trg.shape
         c_trg_h = np.floor(h_trg/2.0).astype(int)
         c_trg_w = np.floor(w_trg/2.0).astype(int)
 
@@ -1141,9 +1138,6 @@ class FDA(object):
     def fda_source_to_target_np(self, src_img, trg_img):
         # exchange magnitude
         # input: src_img, trg_img
-
-        # print(src_img.shape)
-        # print(trg_img.shape)
 
         # get fft of both source and target
         fft_src_np = np.fft.fft2(src_img, axes=(-3, -2))
@@ -1179,7 +1173,6 @@ class FDA(object):
                 result dict.
         """
 
-        # print('Time since last check: {:6.3f} sec.'.format(self.timer.since_last_check()))
         if self.keys is not None:
             for k in self.keys:
                 src, trg = k
@@ -1187,7 +1180,6 @@ class FDA(object):
                     results[src]['img'],
                     results[trg]['img'])
                 results[src]['bandwidth'] = self.bandwidth
-        # print('Time spent on FDA: {:6.3f} sec.'.format(self.timer.since_last_check()))
         return results
 
     def __repr__(self):

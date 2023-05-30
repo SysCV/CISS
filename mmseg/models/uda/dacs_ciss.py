@@ -29,35 +29,6 @@ class DACSCISS(DACS):
 
     def __init__(self, **cfg):
         super(DACSCISS, self).__init__(**cfg)
-        # self.local_iter = 0
-        # self.max_iters = cfg['max_iters']
-        # self.alpha = cfg['alpha']
-        # self.pseudo_threshold = cfg['pseudo_threshold']
-        # self.psweight_ignore_top = cfg['pseudo_weight_ignore_top']
-        # self.psweight_ignore_bottom = cfg['pseudo_weight_ignore_bottom']
-        # self.fdist_lambda = cfg['imnet_feature_dist_lambda']
-        # self.fdist_classes = cfg['imnet_feature_dist_classes']
-        # self.fdist_scale_min_ratio = cfg['imnet_feature_dist_scale_min_ratio']
-        # self.enable_fdist = self.fdist_lambda > 0
-        # self.mix = cfg['mix']
-        # self.blur = cfg['blur']
-        # self.color_jitter_s = cfg['color_jitter_strength']
-        # self.color_jitter_p = cfg['color_jitter_probability']
-        # self.debug_img_interval = cfg['debug_img_interval']
-        # self.print_grad_magnitude = cfg['print_grad_magnitude']
-        # assert self.mix == 'class'
-
-        # self.debug_fdist_mask = None
-        # self.debug_gt_rescale = None
-
-        # self.class_probs = {}
-        # ema_cfg = deepcopy(cfg['model'])
-        # self.ema_model = build_segmentor(ema_cfg)
-
-        # if self.enable_fdist:
-        #     self.imnet_model = build_segmentor(deepcopy(cfg['model']))
-        # else:
-        #     self.imnet_model = None
         
         self.stylization = cfg['stylize']
         self.stylization['source'] = self.stylization.get('source', {})
@@ -71,7 +42,6 @@ class DACSCISS(DACS):
         self.stylization['target']['ce'] = self.stylization['target'].get('ce', [('original', 'original')])
         self.stylization['target']['average_ce'] = self.stylization['target'].get('average_ce', False)
         self.stylization['target']['inv'] = self.stylization['target'].get('inv', [])
-        # assert len(self.stylization['target']['ce']) > 0
         self.stylization['inv_loss'] = self.stylization.get('inv_loss', {})
         self.stylization['inv_loss']['norm'] = self.stylization['inv_loss'].get('norm', 'l2')
         self.stylization['inv_loss']['weight'] = self.stylization['inv_loss'].get('weight', 1.0)
@@ -196,20 +166,14 @@ class DACSCISS(DACS):
         """
         log_vars = {}
         batch_size = img.shape[0]
-        # print('Batch size in forward_train(): ', batch_size)
         dev = img.device
-        # print('Device for img: ', dev)
-        # print('Device for img: ' + dev)
 
         # Init/update ema model
         if self.local_iter == 0:
             self._init_ema_weights()
-            # assert _params_equal(self.get_ema_model(), self.get_model())
 
         if self.local_iter > 0:
             self._update_ema(self.local_iter)
-            # assert not _params_equal(self.get_ema_model(), self.get_model())
-            # assert self.get_ema_model().training
         self.update_debug_state()
         seg_debug = {}
 
@@ -468,7 +432,6 @@ class DACSCISS(DACS):
             vis_img_stylized = torch.clamp(denorm(img_stylized, means, stds), 0, 1)
             vis_trg_img = torch.clamp(denorm(target_img, means, stds), 0, 1)
             vis_trg_img_stylized = torch.clamp(denorm(target_img_stylized, means, stds), 0, 1)
-            # vis_mixed_img = torch.clamp(denorm(mixed_img[0], means, stds), 0, 1)
             for j in range(batch_size):
                 rows, cols = 2, 5
                 fig, axs = plt.subplots(
@@ -498,16 +461,11 @@ class DACSCISS(DACS):
                     pseudo_label[j],
                     'Target Seg (Pseudo) GT',
                     cmap='cityscapes')
-                # subplotimg(axs[0][2], vis_mixed_img[j], 'Mixed Image')
                 subplotimg(
                     axs[0][3], mix_masks[j][0], 'Domain Mask', cmap='gray')
-                # subplotimg(axs[0][3], pred_u_s[j], "Seg Pred",
-                #            cmap="cityscapes")
                 if len(self.stylization['target']['ce']) > 0:
                     subplotimg(
                         axs[1][3], mixed_lbl[0][j], 'Seg Targ', cmap='cityscapes')
-                # subplotimg(
-                #     axs[0][3], pseudo_weight[j], 'Pseudo W.', vmin=0, vmax=1)
                 if self.debug_fdist_mask is not None:
                     subplotimg(
                         axs[0][4],

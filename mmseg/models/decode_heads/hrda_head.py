@@ -150,14 +150,10 @@ class HRDAHead(BaseDecodeHead):
     def forward(self, inputs):
         assert len(inputs) == 2
         hr_inp = inputs[1]
-        # print('HR input shape:', hr_inp['features'].shape)
         hr_scale = self.scales[1]
-        # print('HR scale:', hr_scale)
         lr_inp = inputs[0]
-        # print('LR input shape:', lr_inp[0].shape)
         lr_sc_att_inp = inputs[0]  # separate var necessary for stack hr_fusion
         lr_scale = self.scales[0]
-        # print('LR scale:', lr_scale)
         batch_size = lr_inp[0].shape[0]
         assert lr_scale <= hr_scale
 
@@ -165,13 +161,9 @@ class HRDAHead(BaseDecodeHead):
         if has_crop:
             crop_y1, crop_y2, crop_x1, crop_x2 = self.hr_crop_box
 
-        # print_log(f'lr_inp {[f.shape for f in lr_inp]}', 'mmseg')
         lr_seg, lr_mlp_out, lr_bottleneck_input, lr_bottleneck_out = self.head(lr_inp)
-        # print('LR seg shape:', lr_seg.shape)
-        # print_log(f'lr_seg {lr_seg.shape}', 'mmseg')
 
         hr_seg, hr_mlp_out, hr_bottleneck_input, hr_bottleneck_out = self.decode_hr(hr_inp, batch_size)
-        # print('HR seg shape:', hr_seg.shape)
 
         has_crop = has_crop and hr_seg.shape[2] == lr_seg.shape[2]
 
@@ -182,19 +174,14 @@ class HRDAHead(BaseDecodeHead):
             slc = self.hr_crop_slice(sc_os)
             mask[:, :, slc[0], slc[1]] = 1
             att = att * mask
-        # print_log(f'att {att.shape}', 'mmseg')
         lr_seg = (1 - att) * lr_seg
-        # print_log(f'scaled lr_seg {lr_seg.shape}', 'mmseg')
         up_lr_seg = self.resize(lr_seg, hr_scale / lr_scale)
-        # print('Upsampled LR seg shape:', up_lr_seg.shape)
         if torch.is_tensor(att):
             att = self.resize(att, hr_scale / lr_scale)
 
         if has_crop:
             hr_seg_inserted = torch.zeros_like(up_lr_seg)
-            # print('HR seg inserted shape:', hr_seg_inserted.shape)
             slc = self.hr_crop_slice(self.os)
-            # print('Slice', slc)
             hr_seg_inserted[:, :, slc[0], slc[1]] = hr_seg
         else:
             hr_seg_inserted = hr_seg
