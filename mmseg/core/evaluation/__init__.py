@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 from .class_names import get_classes, get_palette
 from .eval_hooks import DistEvalHook, EvalHook
 from .metrics import eval_metrics, mean_dice, mean_fscore, mean_iou, intersect_and_union, pre_eval_to_metrics

@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 # Obtained from: https://github.com/lhoyer/DAFormer
 # This is the same as SegFormer but with 256 embed_dims
 # SegF. with C_e=256 in Tab. 7

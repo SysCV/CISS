@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 _base_ = ['deeplabv2_r50-d8.py']
 # Previous UDA methods only use the dilation rates 6 and 12 for DeepLabV2.
 # This might be a bit hidden as it is caused by a return statement WITHIN

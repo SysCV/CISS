@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 # optimizer
 optimizer = dict(
     type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01)

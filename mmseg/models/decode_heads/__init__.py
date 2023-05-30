@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 from .aspp_head import ASPPHead
 from .da_head import DAHead
 from .daformer_head import DAFormerHead

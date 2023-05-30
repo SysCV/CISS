@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 # The ema model and the domain-mixing are based on:
 # https://github.com/vikolss/DACS
 

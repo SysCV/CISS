@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 # Obtained from: https://github.com/lhoyer/DAFormer
 
 from copy import deepcopy

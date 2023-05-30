@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 # Default HRDA Configuration for GTA->Cityscapes
 _base_ = [
     '../_base_/default_runtime.py',

@@ -1,3 +1,4 @@
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 from .backbones import *  # noqa: F401,F403
 from .builder import (BACKBONES, HEADS, LOSSES, SEGMENTORS, UDA,
                       build_backbone, build_head, build_loss, build_segmentor)
