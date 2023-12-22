@@ -1,5 +1,6 @@
 # Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 from .acdc import ACDCDataset
+from .acdcref import ACDCrefDataset
 from .builder import DATASETS, PIPELINES, build_dataloader, build_dataset
 from .cityscapes import CityscapesDataset
 from .custom import CustomDataset
@@ -27,6 +28,7 @@ __all__ = [
     'UDADataset',
     'UDADatasetDual',
     'ACDCDataset',
+    'ACDCrefDataset',
     'DarkZurichDataset',
     'BDD100KDataset',
     'ACBenchDataset',

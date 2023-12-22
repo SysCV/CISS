@@ -136,7 +136,7 @@ class UDADatasetDual(CustomDatasetDual):
             self.file_to_idx = {}
             for i, dic in enumerate(self.img_infos_source):
                 file = dic['ann']['seg_map']
-                if self.source == 'Cityscapes':
+                if self.source == 'Cityscapes' or self.source == 'ACDCref':
                     file = file.split('/')[-1]
                 self.file_to_idx[file] = i
 

@@ -181,8 +181,9 @@ Moreover, we provide bash scripts which prepare execution in compute clusters wi
 
 Below, we provide checkpoints of CISS for different benchmarks.
 
-* [CISS for Cityscapes→ACDC](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcHR_ciss_9fcab.tar.gz): **69.6%** mean IoU on the complete adverse-condition test set of ACDC.
-* [CISS for Cityscapes→Dark Zurich](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2dzurHR_ciss_1d68e.tar.gz): **60.7%** mean IoU on the test set of Dark Zurich.
+* [CISS for Cityscapes→ACDC](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcHR_ciss_9fcab.tar.gz): [**69.6%** mean IoU](https://acdc.vision.ee.ethz.ch/submissions/64bc28232b608c14036750dd) on the complete adverse-condition test set of ACDC.
+* [CISS for Cityscapes→Dark Zurich](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2dzurHR_ciss_1d68e.tar.gz): [**60.7%** mean IoU](https://codalab.lisn.upsaclay.fr/competitions/public_submissions/3783) on the test set of Dark Zurich.
+* [CISS for Cityscapes→ACDC-normal](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcrefHR_ciss_5b929.tar.gz): [**78.1%** mean IoU](https://acdc.vision.ee.ethz.ch/submissions/657df7cf487cf3198c21b907) on the normal-condition test set of ACDC.
 
 The checkpoints come with the training logs. Please note that:
 
