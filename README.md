@@ -10,7 +10,7 @@ A novel unsupervised domain adaptation method for semantic segmentation models, 
 
 Adaptation of semantic segmentation networks to different visual conditions from those for which ground-truth annotations are available at training is vital for robust perception in autonomous cars and robots. However, previous work has shown that most feature-level adaptation methods, which employ adversarial training and are validated on synthetic-to-real adaptation, provide marginal gains in normal-to-adverse condition-level adaptation, being outperformed by simple pixel-level adaptation via stylization. Motivated by these findings, we propose to leverage stylization in performing feature-level adaptation by aligning the deep features extracted by the encoder of the network from the original and the stylized view of each input image with a novel feature invariance loss. In this way, **we encourage the encoder to extract features that are invariant to the style of the input**, allowing the decoder to focus on parsing these features and not on further abstracting from the specific style of the input.
 
-We implement our method, named **Condition-Invariant Semantic Segmentation (CISS)**, on the top-performing domain adaptation architecture and demonstrate a significant improvement over previous state-of-the-art methods both on **Cityscapes→ACDC** and **Cityscapes→Dark Zurich adaptation**. In particular, **CISS is ranked first among all published unsupervised domain adaptation (UDA) methods** on the [public ACDC leaderboard](https://acdc.vision.ee.ethz.ch/benchmarks#semanticSegmentation). Our method is also shown to generalize well to domains unseen during training, outperforming competing domain adaptation approaches on BDD100K-night and Nighttime Driving.
+We implement our method, named **Condition-Invariant Semantic Segmentation (CISS)**, on the top-performing domain adaptation architecture and demonstrate a significant improvement over previous state-of-the-art methods both on **Cityscapes→Dark Zurich adaptation** and **Cityscapes→ACDC**. Our method is also shown to generalize well to domains unseen during training, outperforming competing domain adaptation approaches on BDD100K-night.
 
 This repository includes the source code for CISS.
 
@@ -129,7 +129,7 @@ sh tools/download_checkpoints.sh
 ## Testing
 
 The provided CISS checkpoint trained on Cityscapes→ACDC (already downloaded by `tools/download_checkpoints.sh`) can be tested on the
-Cityscapes validation set using:
+ACDC validation set using:
 
 ```shell
 sh test.sh work_dirs/csHR2acdcHR_ciss_9fcab
@@ -181,8 +181,8 @@ Moreover, we provide bash scripts which prepare execution in compute clusters wi
 
 Below, we provide checkpoints of CISS for different benchmarks.
 
-* [CISS for Cityscapes→ACDC](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcHR_ciss_9fcab.tar.gz)
-* [CISS for Cityscapes→Dark Zurich](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2dzurHR_ciss_56306.tar.gz)
+* [CISS for Cityscapes→ACDC](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2acdcHR_ciss_9fcab.tar.gz): **69.6%** mean IoU on the complete adverse-condition test set of ACDC.
+* [CISS for Cityscapes→Dark Zurich](https://data.vision.ee.ethz.ch/csakarid/shared/CISS/csHR2dzurHR_ciss_1d68e.tar.gz): **60.7%** mean IoU on the test set of Dark Zurich.
 
 The checkpoints come with the training logs. Please note that:
 
