@@ -1,8 +1,8 @@
-# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #!/bin/bash
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #
 # Specify time limit.
-#SBATCH --time=23:59:59
+#SBATCH --time=120:00:00
 #
 # Specify number of CPU cores.
 #SBATCH -n 8
@@ -17,13 +17,13 @@
 #SBATCH --gpus=1
 #
 # Specify required GPU memory.
-#SBATCH --gres=gpumem:30g
+#SBATCH --gres=gpumem:50g
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_basic-csHR2acdcHR_ciss-slurm-05.o
+#SBATCH --output=../logs/exp_basic-csHR2acdcHR_ciss-slurm-07.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_basic-csHR2acdcHR_ciss-slurm-05.e
+#SBATCH --error=../logs/exp_basic-csHR2acdcHR_ciss-slurm-07.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append

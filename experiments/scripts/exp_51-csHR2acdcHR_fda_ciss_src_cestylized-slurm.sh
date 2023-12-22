@@ -1,5 +1,5 @@
-# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #!/bin/bash
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #
 # Specify time limit.
 #SBATCH --time=120:00:00

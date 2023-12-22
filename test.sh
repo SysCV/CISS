@@ -1,4 +1,5 @@
 #!/bin/bash
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 
 TEST_ROOT=$1
 CONFIG_FILE="${TEST_ROOT}/*${TEST_ROOT: -1}.json"

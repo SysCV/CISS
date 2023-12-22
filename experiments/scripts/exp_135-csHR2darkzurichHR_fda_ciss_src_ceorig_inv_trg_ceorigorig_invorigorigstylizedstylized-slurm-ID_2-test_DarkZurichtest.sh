@@ -1,5 +1,5 @@
-# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #!/bin/bash
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #
 # Specify time limit.
 #SBATCH --time=3:59:59
@@ -17,10 +17,10 @@
 #SBATCH --gpus=rtx_3090:1
 #
 # Specify file for logging standard output.
-#SBATCH --output=../logs/exp_135-csHR2darkzurichHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm-02-1-test_DarkZurichtest.o
+#SBATCH --output=../logs/exp_135-csHR2darkzurichHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm-2-test_DarkZurichtest.o
 #
 # Specify file for logging standard error.
-#SBATCH --error=../logs/exp_135-csHR2darkzurichHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm-02-1-test_DarkZurichtest.e
+#SBATCH --error=../logs/exp_135-csHR2darkzurichHR_fda_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized-slurm-2-test_DarkZurichtest.e
 #
 # Specify open mode for log files.
 #SBATCH --open-mode=append
@@ -33,9 +33,9 @@ export SOURCE_DIR="/cluster/home/csakarid/code/SysCV/CISS"
 export TARGET_DATASET="darkzurich"
 export DIR_TARGET_DATASET="${TMPDIR}/${TARGET_DATASET}"
 export TAR_TARGET_DATASET="/cluster/work/cvl/csakarid/data/Dark_Zurich/Dark_Zurich.tar.gz"
-export TEST_ROOT="/cluster/work/cvl/csakarid/results/CISS/local-exp135/230306_1111_csHR2dzurHR_1024x1024_dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s1_56306"
+export TEST_ROOT="/cluster/work/cvl/csakarid/results/CISS/local-exp135/230714_1015_csHR2dzurHR_1024x1024_dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized_rcs001-20_hrda1-512-01_daformer_sepaspp_sl_mitb5_poly10warm_s2_1d68e"
 export CONFIG_FILE="${TEST_ROOT}/*${TEST_ROOT: -1}.json"
-export CHECKPOINT_FILE="${TEST_ROOT}/iter_32000_saved.pth"
+export CHECKPOINT_FILE="${TEST_ROOT}/latest.pth"
 export SHOW_DIR="${TEST_ROOT}/Dark_Zurich_test/preds"
 export TRAINIDS_DIR="${TEST_ROOT}/Dark_Zurich_test/labelTrainIds"
 

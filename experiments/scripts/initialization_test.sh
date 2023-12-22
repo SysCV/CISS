@@ -1,5 +1,5 @@
-# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 #!/bin/bash
+# Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by-nc/4.0/)
 
 # Copy datasets to local scratch of compute node.
 /bin/echo Starting dataset copying on: `date`
