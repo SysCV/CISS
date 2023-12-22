@@ -400,8 +400,31 @@ def generate_experiment_cfgs(id):
     plcrop = False
     inference = 'whole'
     sync_crop_size = None
+    # ------------------------------------------------
+    # Table 1: Final CISS on Cityscapes -> Dark Zurich.
+    # -------------------------------------------------
+    elif id == 135:
+        seeds = [0, 1, 2]
+        #         source,          target,         crop,        rcs_min_crop
+        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
+        stylization = 'fda'
+        dec, backbone = 'daformer_sepaspp', 'mitb5'
+        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
+        inference = 'slide'
+        workers_per_gpu = 16
+        for dataset, architecture, sync_crop_size in [
+            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
+        ]:
+            for (inv_loss_weight, inv_loss_weight_target) in [
+                (100.0, 10.0),
+            ]:
+                for seed in seeds:
+                    source, target, crop, rcs_min_crop = dataset
+                    gpu_model = 'NVIDIATITANRTX'
+                    cfg = config_from_vars()
+                    cfgs.append(cfg)
     # ----------------------------------------
-    # Table 1: Final CISS on Cityscapes->ACDC.
+    # Table 2: Final CISS on Cityscapes->ACDC.
     # ----------------------------------------
     if id == 1:
         seeds = [0, 1, 2]
@@ -423,7 +446,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # --------------------------------------------------
-    # Table 5, row 1: HRDA baseline on Cityscapes->ACDC.
+    # Table 8, row 1: HRDA baseline on Cityscapes->ACDC.
     # --------------------------------------------------
     elif id == 50:
         seeds = [0, 1, 2]
@@ -443,7 +466,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -------------------------------------------------------------------------
-    # Table 5, row 2: FDA baseline on Cityscapes -> ACDC.
+    # Table 8, row 2: FDA baseline on Cityscapes -> ACDC.
     # -------------------------------------------------------------------------
     elif id == 51:
         seeds = [0, 1, 2]
@@ -463,7 +486,7 @@ def generate_experiment_cfgs(id):
                 cfg = config_from_vars()
                 cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------
-    # Table 6: CISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # Table 9: CISS ablation study on invariance loss weights in source domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # -----------------------------------------------------------------------------------------------------------------------
     elif id == 129:
         seeds = [0, 1, 2]
@@ -490,7 +513,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # -----------------------------------------------------------------------------------------------------------------------
-    # Table 6: CISS ablation study on invariance loss weights in target domain: CE stylized -> N, CE original -> Y, Inv -> Y.
+    # Table 9: CISS ablation study on invariance loss weights in target domain: CE stylized -> N, CE original -> Y, Inv -> Y.
     # -----------------------------------------------------------------------------------------------------------------------
     elif id == 130:
         seeds = [0, 1, 2]
@@ -517,7 +540,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ---------------------------------------------------------------------------------------------------------------------------------
-    # Table 5, row 6: CISS ablation study on target domain with CE orig + Inv on source.
+    # Table 8, row 6: CISS ablation study on target domain with CE orig + Inv on source.
     # ---------------------------------------------------------------------------------------------------------------------------------
     elif id == 133:
         seeds = [0, 1, 2]
@@ -540,7 +563,7 @@ def generate_experiment_cfgs(id):
                     cfg = config_from_vars()
                     cfgs.append(cfg)
     # ----------------------------------------------------------------------------------------
-    # Table 5, row 3: CISS ablation study on source domain.
+    # Table 8, row 3: CISS ablation study on source domain.
     # ----------------------------------------------------------------------------------------
     elif id == 134:
         seeds = [0, 1, 2]
@@ -559,31 +582,8 @@ def generate_experiment_cfgs(id):
                 gpu_model = 'NVIDIATITANRTX'
                 cfg = config_from_vars()
                 cfgs.append(cfg)
-    # ---------------------------------------------------------------------------------
-    # Table 3: Final CISS on Cityscapes -> Dark Zurich - lambda_s = 100, lambda_t = 50.
-    # ---------------------------------------------------------------------------------
-    elif id == 135:
-        seeds = [0, 1, 2]
-        #         source,          target,         crop,        rcs_min_crop
-        cs2acdc = ('cityscapesHR', 'darkzurichHR', '1024x1024', 0.5 * (2 ** 2))
-        stylization = 'fda'
-        dec, backbone = 'daformer_sepaspp', 'mitb5'
-        uda, rcs_T, plcrop = 'dacs_a999_fdthings_ciss_src_ceorig_inv_trg_ceorigorig_invorigorigstylizedstylized', 0.01, False
-        inference = 'slide'
-        workers_per_gpu = 16
-        for dataset, architecture, sync_crop_size in [
-            (cs2acdc, f'hrda1-512-0.1_{dec}', None),
-        ]:
-            for (inv_loss_weight, inv_loss_weight_target) in [
-                (100.0, 50.0),
-            ]:
-                for seed in seeds:
-                    source, target, crop, rcs_min_crop = dataset
-                    gpu_model = 'NVIDIATITANRTX'
-                    cfg = config_from_vars()
-                    cfgs.append(cfg)
     # --------------------------------------------------------------------------------------------------------
-    # Table 7: CISS with Reinhard stylization in target domain.
+    # Table 10: CISS with Reinhard stylization in target domain.
     # --------------------------------------------------------------------------------------------------------
     elif id == 136:
         seeds = [0, 1, 2]
